@@ -299,27 +299,21 @@ def get_models():
 NAV_GROUPS = [
     ("", [
         ("🏠  Overview",          "overview"),
-        ("📽️  Presentation Mode", "presentation_mode"),
         ("♟️  Strategic Playbook", "strategic_playbook"),
     ]),
     ("MARKET INTELLIGENCE", [
         ("📊  Market Explorer",   "market_explorer"),
-        ("🗺️  Market Map",        "market_map"),
         ("💰  Pricing & Value",   "pricing_value"),
-        ("👥  Player & Discovery","player_discovery"),
-        ("🌍  Platform & Global", "platform_global"),
+        ("🌍  Audience & Reach",  "audience_reach"),
         ("📈  Genre Benchmark",   "genre_benchmark"),
-        ("⚡  Anomaly Finder",    "anomaly_finder"),
     ]),
     ("GAME INTELLIGENCE", [
         ("🎮  Game Analyzer",     "game_analyzer"),
-        ("⚔️  Game Comparison",   "game_comparison"),
-        ("🎯  Similar Games",     "similar_games"),
+        ("⚔️  Competitive Analysis", "competitive_analysis"),
     ]),
     ("CREATOR TOOLS", [
         ("🚀  Publisher Studio",  "publisher_studio"),
-        ("🔬  Model Lab",         "model_lab"),
-        ("🧩  Segmentation",      "segmentation_page"),
+        ("🧪  Advanced Analytics","advanced_analytics"),
     ]),
     ("", [
         ("📖  Methodology",       "methodology"),
@@ -408,13 +402,17 @@ try:
         from app.pages.strategic_playbook import render
         render(df)
 
-    elif page_key == "presentation_mode":
-        from app.pages.presentation_mode import render
-        render(df, models)
-
     elif page_key == "market_explorer":
         from app.pages.market_explorer import render
         render(df)
+
+    elif page_key == "pricing_value":
+        from app.pages.pricing_value import render
+        render(df)
+
+    elif page_key == "audience_reach":
+        from app.pages.audience_reach import render
+        render(df, models)
 
     elif page_key == "genre_benchmark":
         from app.pages.genre_benchmark import render
@@ -424,45 +422,17 @@ try:
         from app.pages.game_analyzer import render
         render(df, models)
 
-    elif page_key == "game_comparison":
-        from app.pages.game_comparison import render
+    elif page_key == "competitive_analysis":
+        from app.pages.competitive_analysis import render
         render(df, models)
-
-    elif page_key == "similar_games":
-        from app.pages.similar_games import render
-        render(df)
 
     elif page_key == "publisher_studio":
         from app.pages.publisher_studio import render
         render(df, models)
 
-    elif page_key == "market_map":
-        from app.pages.market_map import render
-        render(df)
-
-    elif page_key == "pricing_value":
-        from app.pages.pricing_value import render
-        render(df)
-
-    elif page_key == "player_discovery":
-        from app.pages.player_discovery import render
-        render(df)
-
-    elif page_key == "platform_global":
-        from app.pages.platform_global import render
-        render(df)
-
-    elif page_key == "model_lab":
-        from app.pages.model_lab import render
+    elif page_key == "advanced_analytics":
+        from app.pages.advanced_analytics import render
         render(df, models)
-
-    elif page_key == "segmentation_page":
-        from app.pages.segmentation_page import render
-        render(df)
-
-    elif page_key == "anomaly_finder":
-        from app.pages.anomaly_finder import render
-        render(df)
 
     elif page_key == "methodology":
         from app.pages.methodology import render
