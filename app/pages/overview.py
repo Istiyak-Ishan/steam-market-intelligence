@@ -335,7 +335,7 @@ def render(df: pd.DataFrame) -> None:
 - 🎮 **{top_genre}** is the most common genre, representing **{df['primary_genre'].value_counts().iloc[0]:,} games** — shaping platform averages and review baselines.
 - 💰 The **\\$5–\\$15 price range** contains **{sweet_pct:.0f}% of all top-rated games** (≥80% positive), making it the clearest value sweet spot on Steam.
 - 🌍 Games supporting **10+ languages** attract **{loc_mult:.1f}× more owners** on average than single-language titles — localisation is the highest-ROI investment available.
-- ⭐ Only **{len(real_meta) if 'real_meta' not in dir() else df[df['metacritic_score'] > 0].shape[0]:,}** titles ({df[df['metacritic_score'] > 0].shape[0]/len(df)*100:.1f}%) have a real Metacritic score, yet those games average **{df[df['metacritic_score'] > 0]['owners_mid'].mean()/max(1,df['owners_mid'].mean()):.1f}× higher ownership** than unscored titles.
+- ⭐ Only **{df[df['metacritic_score'] > 0].shape[0]:,}** titles ({df[df['metacritic_score'] > 0].shape[0]/len(df)*100:.1f}%) have a real Metacritic score, yet those games average **{df[df['metacritic_score'] > 0]['owners_mid'].mean()/max(1,df['owners_mid'].mean()):.1f}× higher ownership** than unscored titles.
 - 📊 The top **1%** of games hold **{top_1pct_share:.0f}% of all estimated ownership** — Steam follows an extreme Pareto distribution requiring viral-level breakout to reach mass market.
     """)
 
