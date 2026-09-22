@@ -178,10 +178,12 @@ def load_dynamic_tier_model(model_type="Decision Tree"):
         model = LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42)
         model.fit(X_scaled, y)
         model.is_scaled = True
+        model.training_score = model.score(X_scaled, y)
         return model
     
     model.fit(X, y)
     model.is_scaled = False
+    model.training_score = model.score(X, y)
     return model
 
 
@@ -212,8 +214,68 @@ def load_dynamic_value_model(model_type="Decision Tree"):
         model = LinearRegression()
         model.fit(X_scaled, y)
         model.is_scaled = True
+        model.training_score = model.score(X_scaled, y)
         return model
         
     model.fit(X, y)
     model.is_scaled = False
+    model.training_score = model.score(X, y)
     return model
+
+
+@st.cache_resource(show_spinner=False)
+def load_dynamic_price_regressor(model_type="Random Forest (Pre-trained)"):
+    """
+    Train a continuous price regressor dynamically.
+    Since we don't have a pre-trained price regressor pickle, 'Random Forest (Pre-trained)' 
+    will also just train a dynamic RandomForestRegressor on the fly.
+    """
+    from src.data_loader import load_data
+    from src.feature_engineering import apply_all_features
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.linear_model import LinearRegression
+    
+    df = load_data()
+    df = apply_all_features(df)
+    
+    # Filter valid prices and remove extreme outliers > $80
+    train_df = df[(df["price"] > 0) & (df["price"] <= 80)].dropna(subset=MODEL_FEATURES + ["price"]).copy()
+    
+    X = train_df[MODEL_FEATURES]
+    y = train_df["price"]
+    
+    if model_type == "Decision Tree":
+        model = DecisionTreeRegressor(max_depth=10, random_state=42)
+    elif model_type in ["Linear Regression", "Linear/Logistic Regression"]:
+        scaler = load_scaler()
+        X_scaled = scaler.transform(X)
+        model = LinearRegression()
+        model.fit(X_scaled, y)
+        model.is_scaled = True
+        model.training_score = model.score(X_scaled, y)
+        return model
+    else:
+        # Fallback for Random Forest
+        model = RandomForestRegressor(n_estimators=50, max_depth=12, random_state=42)
+        
+    model.fit(X, y)
+    model.is_scaled = False
+    model.training_score = model.score(X, y)
+    return model
+
+
+def predict_price_sweetspot(game_profile: dict, model_type: str = "Random Forest (Pre-trained)") -> float:
+    """Predict the exact dollar sweetspot price for a game profile."""
+    from src.feature_engineering import build_model_input
+    
+    model = load_dynamic_price_regressor(model_type)
+    X = build_model_input(game_profile)
+    
+    if getattr(model, "is_scaled", False):
+        scaler = load_scaler()
+        X = scaler.transform(X)
+        
+    price_pred = float(model.predict(X)[0])
+    # Cap negative or weird predictions
+    return max(0.0, price_pred)
