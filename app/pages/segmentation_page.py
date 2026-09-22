@@ -350,15 +350,18 @@ def render(df: pd.DataFrame, hide_header: bool = False) -> None:
     # ── TAB 4: Game lookup ────────────────────────────────────────────────────
     with tab_lookup:
         st.markdown('<div class="section-header">Find Which Segment a Game Belongs To</div>', unsafe_allow_html=True)
-        search = st.text_input("Search game name", placeholder="e.g. Hollow Knight, Terraria…")
+        game_names = seg_df["name"].dropna().tolist()
+        selected_name = st.selectbox(
+            "Search game name", 
+            options=game_names, 
+            index=None, 
+            placeholder="e.g. Hollow Knight, Terraria…"
+        )
 
-        if search:
-            matches = seg_df[seg_df["name"].str.contains(search, case=False, na=False)]
-            if matches.empty:
-                st.warning("No games found matching that search term.")
-            else:
-                selected_name = st.selectbox("Select game", matches["name"].tolist())
-                game_row = matches[matches["name"] == selected_name].iloc[0]
+        if selected_name:
+            matches = seg_df[seg_df["name"] == selected_name]
+            if not matches.empty:
+                game_row = matches.iloc[0]
 
                 seg_label = game_row.get("cluster_label", "Unknown")
                 seg_id    = game_row.get("cluster_id", -1)
