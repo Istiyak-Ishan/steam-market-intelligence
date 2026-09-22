@@ -754,7 +754,7 @@ def _cohort_heatmap(
 
 # ── Main render ───────────────────────────────────────────────────────────────
 
-def render(df: pd.DataFrame) -> None:
+def _render_internal(df: pd.DataFrame) -> None:
 
     st.markdown("""
     <style>
@@ -1177,3 +1177,17 @@ def render(df: pd.DataFrame) -> None:
         Hover over data points for exact values.
     </div>
     """, unsafe_allow_html=True)
+
+
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
+    if not hide_header:
+        st.markdown('<div class="hero-header"><div class="hero-title">📊 Market Explorer</div><div class="hero-subtitle">Interactive multidimensional exploration & Market Map.</div></div>', unsafe_allow_html=True)
+    
+    tab1, tab2 = st.tabs(["Data Grid & Filters", "Visual Market Map"])
+    
+    with tab1:
+        _render_internal(df)
+        
+    with tab2:
+        from app.pages import market_map
+        market_map.render(df, hide_header=True)
