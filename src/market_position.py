@@ -293,10 +293,9 @@ def compute_market_gap_signal(
     grp["supply_indicator"] = grp["game_count"]
     grp["gap_signal"] = grp["demand_indicator"] / (1 + grp["supply_indicator"])
 
-    # Normalise gap_signal to 0–100 for interpretability
-    max_sig = grp["gap_signal"].replace([np.inf, -np.inf], np.nan).dropna().max()
-    if max_sig and max_sig > 0:
-        grp["gap_signal_norm"] = (grp["gap_signal"] / max_sig * 100).round(2)
+    # Normalise gap_signal to 0–100 percentile rank for better interpretability
+    if not grp.empty:
+        grp["gap_signal_norm"] = (grp["gap_signal"].rank(pct=True) * 100).round(1)
     else:
         grp["gap_signal_norm"] = 0.0
 
