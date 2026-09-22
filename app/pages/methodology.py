@@ -19,7 +19,7 @@ def render(df=None, models=None) -> None:
     </div>
     """, unsafe_allow_html=True)
 
-    html_path = PROJECT_ROOT / "notebooks" / "EDA_output.html"
+    html_path = PROJECT_ROOT / "notebooks" / "Strategic_EDA_output.html"
 
     if html_path.exists():
         with open(html_path, "r", encoding="utf-8") as f:
