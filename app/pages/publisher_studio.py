@@ -387,14 +387,6 @@ def render(df: pd.DataFrame, models: dict) -> None:
     with t2:
         st.metric("Alternative Price Tier (ML)", f"{a_tier_pred}", delta="Shifted" if (enable_alt and a_tier_pred != b_tier_pred) else None)
 
-    st.markdown("""
-    <div class="info-box">
-        <strong>⚠️ Note on ML Output:</strong> 
-        The model outputs above reflect historical associations between product configurations and their market positioning. 
-        Adjusting variables like 'Languages' or 'Price' calculates how similar configurations historically placed in the market; 
-        it does <em>not</em> represent guaranteed future revenue or unit sales multipliers.
-    </div>
-    """, unsafe_allow_html=True)
 
     tab_radar, tab_pos, tab_sim = st.tabs(["📊 Radar & Benchmarks", "📉 Market Position", "🔍 Comparable Games"])
 
