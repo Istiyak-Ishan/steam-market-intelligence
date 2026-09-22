@@ -185,12 +185,53 @@ def train_models():
 
     report_lines.append(f"## 5. Price Tier Classifier\n- Test Accuracy: {acc:.4f}\n- Train size: {len(X_train):,} | Test size: {len(X_test):,}\n\n### Classification Report\n```\n{cr}\n```\n\n### Confusion Matrix\n```\n{cm_df.to_string()}\n```\n")
 
+    # =====================================================================
+    # 6. Fair Price Classifier (Model 4 per proposal)
+    # Fair = (price <= genre median) OR (value_score >= genre median value_score)
+    # =====================================================================
+    print("\n--- Training model_fair_price_classifier ---")
+    df_fair = df[(df["price"] > 0) & (df["has_reviews"] == 1)].dropna(
+        subset=BASE_FEATURES + ["price", "value_score_calc", "primary_genre"]
+    ).copy()
+
+    genre_med_price = df_fair.groupby("primary_genre")["price"].transform("median")
+    genre_med_value = df_fair.groupby("primary_genre")["value_score_calc"].transform("median")
+    df_fair["is_fair"] = (
+        (df_fair["price"] <= genre_med_price) | (df_fair["value_score_calc"] >= genre_med_value)
+    ).astype(int)
+
+    X_fair = df_fair[BASE_FEATURES + ["price"]]
+    y_fair = df_fair["is_fair"]
+    X_train_f, X_test_f, y_train_f, y_test_f = train_test_split(
+        X_fair, y_fair, test_size=0.2, random_state=42, stratify=y_fair
+    )
+
+    from sklearn.tree import DecisionTreeClassifier
+    fair_clf = DecisionTreeClassifier(max_depth=8, min_samples_leaf=50, random_state=42)
+    fair_clf.fit(X_train_f, y_train_f)
+    y_pred_f = fair_clf.predict(X_test_f)
+    acc_f = accuracy_score(y_test_f, y_pred_f)
+    cr_f = classification_report(y_test_f, y_pred_f, target_names=["Overpriced", "Fair"])
+    print(f"  Test Accuracy: {acc_f:.4f}")
+    print(cr_f)
+    joblib.dump(fair_clf, MODELS_DIR / "model_fair_price_clf.pkl")
+
+    fi_df = pd.DataFrame({
+        "feature": list(X_fair.columns),
+        "importance": fair_clf.feature_importances_,
+    }).sort_values("importance", ascending=False)
+    fi_df.to_csv(MODELS_DIR / "fair_price_feature_importance.csv", index=False)
+    with open(MODELS_DIR / "fair_price_classification_report.txt", "w") as f:
+        f.write(cr_f)
+
+    report_lines.append(f"## 6. Fair Price Classifier\n- Test Accuracy: {acc_f:.4f}\n- Definition: Fair = (price <= genre median) OR (value_score >= genre median)\n- Algorithm: DecisionTree(max_depth=8)\n- Train size: {len(X_train_f):,} | Test size: {len(X_test_f):,}\n\n### Classification Report\n```\n{cr_f}\n```\n")
+
     # Save full report
     report_path = MODELS_DIR / "training_report.md"
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("\n".join(report_lines))
     print(f"\nTraining report saved to {report_path}")
-    print("\nAll 5 models trained and saved successfully!")
+    print("\nAll 6 models trained and saved successfully!")
 
 
 if __name__ == "__main__":

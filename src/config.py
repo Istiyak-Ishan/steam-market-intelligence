@@ -17,9 +17,9 @@ ASSETS_DIR = PROJECT_ROOT / "assets"
 CLEANED_CSV        = DATA_DIR / "steam_games_cleaned.csv"
 GENRE_PIVOT_CSV    = DATA_DIR / "genre_pivot_summary.csv"
 
-REGRESSOR_PKL      = MODELS_DIR / "price_value_regressor.pkl"
-CLASSIFIER_PKL     = MODELS_DIR / "price_tier_classifier.pkl"
-SCALER_PKL         = MODELS_DIR / "feature_scaler.pkl"
+REGRESSOR_PKL      = MODELS_DIR / "model_value_score.pkl"
+CLASSIFIER_PKL     = MODELS_DIR / "model_price_tier_clf.pkl"
+FAIR_PRICE_PKL     = MODELS_DIR / "model_fair_price_clf.pkl"
 
 # ── Dataset provenance ────────────────────────────────────────────────────────
 RAW_ROW_COUNT      = 136_971   # steam_games.csv shape[0] per preprocessing notebook

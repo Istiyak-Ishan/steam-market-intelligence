@@ -287,12 +287,15 @@ def get_models():
     from src.model_loader import (
         load_sweetspot_model, load_review_score_model,
         load_value_score_model, load_ownership_model,
+        load_price_tier_clf, load_fair_price_clf,
     )
     return {
-        "sweetspot":   load_sweetspot_model(),
-        "review":      load_review_score_model(),
-        "value":       load_value_score_model(),
-        "ownership":   load_ownership_model(),
+        "sweetspot":      load_sweetspot_model(),
+        "review":         load_review_score_model(),
+        "value":          load_value_score_model(),
+        "ownership":      load_ownership_model(),
+        "price_tier_clf": load_price_tier_clf(),
+        "fair_price_clf": load_fair_price_clf(),
     }
 
 
