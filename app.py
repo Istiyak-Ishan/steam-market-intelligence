@@ -303,9 +303,6 @@ NAV_GROUPS = [
     ]),
     ("MARKET INTELLIGENCE", [
         ("📊  Market Explorer",   "market_explorer"),
-        ("💰  Pricing & Value",   "pricing_value"),
-        ("🌍  Audience & Reach",  "audience_reach"),
-        ("📈  Genre Benchmark",   "genre_benchmark"),
     ]),
     ("GAME INTELLIGENCE", [
         ("🎮  Game Analyzer",     "game_analyzer"),
