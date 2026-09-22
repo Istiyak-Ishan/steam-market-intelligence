@@ -34,7 +34,7 @@ def render(df: pd.DataFrame) -> None:
         There is a dense concentration of high-quality titles (≥85% positive) priced between $9.99 and $14.99 that out-perform $60 AAA titles in user review percentages.
         
         **2. VISUAL EVIDENCE:** 
-        See *Market Map*. The "Lower-Price / Higher-Quality" quadrant contains over 14,000 titles, heavily concentrated in the Indie and Casual genres.
+        See *Market Insights* page. The "Lower-Price / Higher-Quality" quadrant contains over 14,000 titles, heavily concentrated in the Indie and Casual genres.
         
         **3. INTERPRETATION:** 
         Review scores on Steam frequently reflect a "Value-for-Money" ratio rather than absolute graphical fidelity. Lower-priced games often set achievable player expectations, leading to higher satisfaction rates.
@@ -69,13 +69,13 @@ def render(df: pd.DataFrame) -> None:
         Titles supporting 10 or more languages show a median ownership size approximately 3.4x higher than titles supporting 2 or fewer languages.
         
         **2. VISUAL EVIDENCE:** 
-        See *Overview > Market Signals* ("Localization Ownership Multiplier") and *Platform & Global > Localization Impact*.
+        See *Overview > Key Findings* ("Localization Reach Multiplier") and *Market Insights > Localization* tab.
         
         **3. INTERPRETATION:** 
         While translating a game incurs upfront costs, reaching non-English speaking markets historically associates with a significant increase in the total addressable market and baseline ownership pool.
         
         **4. POSSIBLE ACTION:** 
-        Indie studios should budget for basic UI and subtitle localization for 4-6 high-impact languages (e.g., Simplified Chinese, Spanish, Russian) before launch, using the *Platform & Global* dashboard to identify which languages correlate with their specific genre.
+        Indie studios should budget for basic UI and subtitle localization for 4-6 high-impact languages (e.g., Simplified Chinese, Spanish, Russian) before launch, using the *Market Insights* dashboard to identify which languages correlate with their specific genre.
         """)
 
         st.markdown('<hr>', unsafe_allow_html=True)
@@ -104,7 +104,7 @@ def render(df: pd.DataFrame) -> None:
         Certain Genre × Tier intersections (e.g., Mid-range RPGs) exhibit a high "Market Gap Signal"—meaning they have high median ownership and review scores but a relatively low count of competing titles.
         
         **2. VISUAL EVIDENCE:** 
-        See *Genre Benchmark > Market Gap Signal*. The scatter plot clearly isolates segments where the 'Demand Indicator' vastly outpaces the 'Supply Indicator'.
+        See *Game Analyzer > Market Position* and *Publisher Studio > What-If Simulator*. Adjusting genre and price in the simulator highlights underserved segments.
         
         **3. INTERPRETATION:** 
         A high Gap Signal suggests an underserved player base. Historically, publishers releasing competent titles into these specific segments encounter less friction in discovery and user acquisition.
@@ -121,13 +121,13 @@ def render(df: pd.DataFrame) -> None:
         K-Means clustering reveals that the Steam market is cleanly divisible into segments like "Low-Price / Lower-Quality" (volume-driven) and "High-Price / High-Quality" (prestige-driven).
         
         **2. VISUAL EVIDENCE:** 
-        See *Segmentation > Cluster Maps*. The PCA projection and heatmap confirm distinct, non-overlapping clusters of product types.
+        See *Cluster Explorer* page. The PCA projection and heatmap confirm distinct, non-overlapping clusters: Hidden Gems, Budget Filler, Justified AAA, and Overpriced Premium.
         
         **3. INTERPRETATION:** 
         Successful publisher portfolios often require a balance. Relying solely on prestige titles increases risk due to long development cycles, while volume-driven titles can damage brand reputation.
         
         **4. POSSIBLE ACTION:** 
-        Publishers can use the *Game Lookup* tool in the Segmentation page to audit their current portfolio, ensuring they have a diversified spread of titles across at least 3 of the 5 natural market archetypes.
+        Publishers can use the *Game Analyzer* tool to audit individual titles, ensuring they have a diversified spread of titles across at least 3 of the 5 natural market archetypes visible in the Cluster Explorer.
         """)
 
 

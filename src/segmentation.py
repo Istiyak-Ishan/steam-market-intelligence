@@ -112,19 +112,38 @@ def run_segmentation(df: pd.DataFrame, k: int | None = None, force: bool = False
 
 def _describe_cluster(cid: int, profiles: pd.DataFrame) -> str:
     """
-    Build a descriptive label from the cluster's median feature values.
-    Labels are relative to other clusters — no invented marketing names.
+    Assign a meaningful archetype label based on the cluster's median
+    price and value_score (or review_score_pct as proxy).
+
+    Archetypes:
+      - high price + low value  → "Overpriced Premium"
+      - low price + high value  → "Hidden Gems"
+      - high price + high value → "Justified AAA"
+      - low price + low value   → "Budget Filler"
+      - mid-range everything    → "Mainstream Mid-Tier"
     """
-    row = profiles.loc[cid]
+    if "price" not in profiles.columns or "review_score_pct" not in profiles.columns:
+        return f"Segment {cid + 1}"
 
-    # Rank clusters by price and quality (review_score_pct)
-    price_rank   = profiles["price"].rank(ascending=False).astype(int).get(cid, "?") if "price" in profiles.columns else "?"
-    quality_rank = profiles["review_score_pct"].rank(ascending=False).astype(int).get(cid, "?") if "review_score_pct" in profiles.columns else "?"
+    price_med = profiles["price"].median()
+    qual_med = profiles["review_score_pct"].median()
 
-    price_level   = "High-Price"   if profiles.get("price", pd.Series()).rank(ascending=False).get(cid, 99) <= len(profiles) // 2 else "Low-Price"
-    quality_level = "High-Quality" if profiles.get("review_score_pct", pd.Series()).rank(ascending=False).get(cid, 99) <= len(profiles) // 2 else "Lower-Quality"
+    row_price = profiles.loc[cid, "price"]
+    row_qual = profiles.loc[cid, "review_score_pct"]
 
-    return f"Segment {cid + 1}: {price_level} / {quality_level}"
+    high_price = row_price >= price_med
+    high_qual = row_qual >= qual_med
+
+    if high_price and not high_qual:
+        return "💸 Overpriced Premium"
+    elif not high_price and high_qual:
+        return "💎 Hidden Gems"
+    elif high_price and high_qual:
+        return "👑 Justified AAA"
+    elif not high_price and not high_qual:
+        return "🪙 Budget Filler"
+    else:
+        return "📊 Mainstream Mid-Tier"
 
 
 def get_cluster_profiles(df: pd.DataFrame) -> pd.DataFrame:

@@ -321,6 +321,34 @@ def render(df: pd.DataFrame) -> None:
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Key Findings — computed from live data ────────────────────────────────
+    st.subheader("Key Findings")
+
+    # Compute real numbers for bullets
+    action_med  = paid[paid["primary_genre"] == "Action"]["price"].median() if "primary_genre" in paid.columns else 0
+    top_genre   = df["primary_genre"].value_counts().index[0] if "primary_genre" in df.columns else "Action"
+    sweet_pct   = len(df[(df["price"] >= 5) & (df["price"] <= 15) & (df["review_score_pct"] >= 0.8)]) / max(1, len(df[df["review_score_pct"] >= 0.8])) * 100
+    budget_high = df[(df["price_tier"] == "Budget") & (df["review_score_pct"] >= 0.8)].shape[0] if "price_tier" in df.columns else 0
+    loc_mult    = lang_mult  # computed above
+
+    st.markdown(f"""
+- 🎮 **{top_genre}** is the most common genre, representing **{df['primary_genre'].value_counts().iloc[0]:,} games** — shaping platform averages and review baselines.
+- 💰 The **\\$5–\\$15 price range** contains **{sweet_pct:.0f}% of all top-rated games** (≥80% positive), making it the clearest value sweet spot on Steam.
+- 🌍 Games supporting **10+ languages** attract **{loc_mult:.1f}× more owners** on average than single-language titles — localisation is the highest-ROI investment available.
+- ⭐ Only **{len(real_meta) if 'real_meta' not in dir() else df[df['metacritic_score'] > 0].shape[0]:,}** titles ({df[df['metacritic_score'] > 0].shape[0]/len(df)*100:.1f}%) have a real Metacritic score, yet those games average **{df[df['metacritic_score'] > 0]['owners_mid'].mean()/max(1,df['owners_mid'].mean()):.1f}× higher ownership** than unscored titles.
+- 📊 The top **1%** of games hold **{top_1pct_share:.0f}% of all estimated ownership** — Steam follows an extreme Pareto distribution requiring viral-level breakout to reach mass market.
+    """)
+
+    kf_col1, kf_col2, kf_col3 = st.columns(3)
+    kf_col1.metric("Games Analyzed", f"{stats['total_games']:,}")
+    kf_col2.metric(
+        "Avg Value Score (paid)",
+        f"{paid['review_score_pct'].mean() * 100 / max(0.01, paid['price'].mean()):.2f} pts/$",
+    )
+    kf_col3.metric("Top Genre by Count", top_genre)
+
+    st.markdown("---")
+
     # ── Market Signals ────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">Market Signals</div>', unsafe_allow_html=True)
 

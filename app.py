@@ -305,22 +305,22 @@ def get_models():
 
 NAV_GROUPS = [
     ("", [
-        ("🏠  Overview",          "overview"),
-        ("♟️  Strategic Playbook", "strategic_playbook"),
+        ("🏠  Overview",               "overview"),
+        ("📊  Market Insights",         "market_explorer"),
+        ("📈  Quality vs. Price",       "competitive_analysis"),
     ]),
-    ("MARKET INTELLIGENCE", [
-        ("📊  Market Explorer",   "market_explorer"),
+    ("ML TOOLS", [
+        ("🔮  Predict Tool",           "predict_tool"),
+        ("🔍  Feature Importance",      "advanced_analytics"),
+        ("🗂️  Cluster Explorer",       "segmentation"),
     ]),
     ("GAME INTELLIGENCE", [
-        ("🎮  Game Analyzer",     "game_analyzer"),
-        ("⚔️  Competitive Analysis", "competitive_analysis"),
-    ]),
-    ("CREATOR TOOLS", [
-        ("🚀  Publisher Studio",  "publisher_studio"),
-        ("🧪  Advanced Analytics","advanced_analytics"),
+        ("🎮  Game Analyzer",           "game_analyzer"),
+        ("🚀  Publisher Studio",        "publisher_studio"),
+        ("♟️  Strategic Playbook",      "strategic_playbook"),
     ]),
     ("", [
-        ("📖  EDA",               "methodology"),
+        ("📖  EDA",                    "methodology"),
     ]),
 ]
 
@@ -402,33 +402,42 @@ try:
         from app.pages.overview import render
         render(df)
 
-    elif page_key == "strategic_playbook":
-        from app.pages.strategic_playbook import render
-        render(df)
-
     elif page_key == "market_explorer":
         from app.pages.market_explorer import render
         render(df)
-
-    elif page_key == "game_analyzer":
-        from app.pages.game_analyzer import render
-        render(df, models)
 
     elif page_key == "competitive_analysis":
         from app.pages.competitive_analysis import render
         render(df, models)
 
-    elif page_key == "publisher_studio":
-        from app.pages.publisher_studio import render
+    elif page_key == "predict_tool":
+        from app.pages.predict_tool import render
         render(df, models)
 
     elif page_key == "advanced_analytics":
         from app.pages.advanced_analytics import render
         render(df, models)
 
+    elif page_key == "segmentation":
+        from app.pages.segmentation_page import render
+        render(df)
+
+    elif page_key == "game_analyzer":
+        from app.pages.game_analyzer import render
+        render(df, models)
+
+    elif page_key == "publisher_studio":
+        from app.pages.publisher_studio import render
+        render(df, models)
+
+    elif page_key == "strategic_playbook":
+        from app.pages.strategic_playbook import render
+        render(df)
+
     elif page_key == "methodology":
         from app.pages.methodology import render
         render(df)
+
         
 except Exception as e:
     st.error(f"**Application Error:** An unexpected issue occurred while rendering this page.")
