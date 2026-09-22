@@ -7,9 +7,15 @@ Key design decisions:
   - On first call applies all type conversions needed for downstream modules.
   - The 'steam_games_EDA_ready.csv' referenced in EDA.ipynb does not exist;
     we rebuild equivalent features from steam_games_cleaned.csv.
+
+Preprocessing applied:
+  - metacritic_score==0 treated as missing; imputed with genre-level median
+  - price and peak_ccu capped at 99th percentile
+  - Top-5 tags one-hot encoded as tag_* binary columns
 """
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 
@@ -20,6 +26,11 @@ import streamlit as st
 from src.config import CLEANED_CSV, GENRE_PIVOT_CSV, MIN_GENRE_GAMES
 
 log = logging.getLogger(__name__)
+
+# Top 5 most frequent Steam tags (computed offline from full dataset)
+TOP_TAGS = ["Singleplayer", "Indie", "Action", "Casual", "Adventure"]
+
+
 def _load_raw() -> pd.DataFrame:
     """Load and type-coerce steam_games_cleaned.csv exactly once."""
     path = Path(CLEANED_CSV)
@@ -74,13 +85,11 @@ def _load_raw() -> pd.DataFrame:
         df.loc[df["primary_genre"].str.startswith("{"), "primary_genre"] = np.nan
         df.loc[df["primary_genre"] == "nan", "primary_genre"] = np.nan
 
-        # Fallback to first genre listed in 'genres' if primary_genre is missing
         if "genres" in df.columns:
             fallback = df["genres"].dropna().astype(str).str.split(",").str[0].str.strip()
             df["primary_genre"] = df["primary_genre"].fillna(fallback)
             df.loc[df["primary_genre"] == "nan", "primary_genre"] = np.nan
 
-        # Normalize localized translation aliases
         alias_map = {
             "Aventura": "Adventure",
             "Aventure": "Adventure",
@@ -95,6 +104,47 @@ def _load_raw() -> pd.DataFrame:
             .fillna("")
             .apply(lambda x: len([s for s in x.split(",") if s.strip()]) if x.strip() else 0)
         )
+
+    # ── Issue A: metacritic_score == 0 means missing, not a real zero ────────
+    if "metacritic_score" in df.columns:
+        df["metacritic_missing"] = (df["metacritic_score"] == 0).astype(int)
+        df.loc[df["metacritic_score"] == 0, "metacritic_score"] = np.nan
+        # Impute with genre-level median
+        if "primary_genre" in df.columns:
+            genre_median = df.groupby("primary_genre")["metacritic_score"].transform("median")
+            global_median = df["metacritic_score"].median()
+            df["metacritic_score"] = df["metacritic_score"].fillna(
+                genre_median.fillna(global_median)
+            )
+        else:
+            global_median = df["metacritic_score"].median()
+            df["metacritic_score"] = df["metacritic_score"].fillna(global_median)
+
+    # ── Issue B: Cap price and peak_ccu at 99th percentile ───────────────────
+    for cap_col in ["price", "peak_ccu"]:
+        if cap_col in df.columns:
+            p99 = df[cap_col].quantile(0.99)
+            df[cap_col] = df[cap_col].clip(upper=p99)
+
+    # ── Issue C: Top-5 tag one-hot encoding ──────────────────────────────────
+    if "tags" in df.columns:
+        def _parse_tags(tag_str):
+            """Parse JSON-like tag string into a Python list."""
+            if pd.isna(tag_str) or not str(tag_str).strip():
+                return []
+            try:
+                result = json.loads(str(tag_str))
+                if isinstance(result, list):
+                    return result
+            except (json.JSONDecodeError, ValueError):
+                pass
+            return [t.strip().strip('"') for t in str(tag_str).strip("[]").split(",") if t.strip()]
+
+        parsed_tags = df["tags"].apply(_parse_tags)
+        for tag in TOP_TAGS:
+            col_name = "tag_" + tag.lower().replace(" ", "_")
+            if col_name not in df.columns:
+                df[col_name] = parsed_tags.apply(lambda tags: int(tag in tags))
 
     return df
 
