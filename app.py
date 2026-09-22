@@ -316,7 +316,7 @@ NAV_GROUPS = [
         ("🧪  Advanced Analytics","advanced_analytics"),
     ]),
     ("", [
-        ("📖  Methodology",       "methodology"),
+        ("📖  EDA",               "methodology"),
     ]),
 ]
 
