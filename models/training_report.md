@@ -49,3 +49,22 @@ Mid-range    2003       1360       46   11
 Premium        99        155       89    1
 AAA            30          5        6   16
 ```
+
+## 6. Fair Price Classifier
+- Test Accuracy: 0.9459
+- Definition: Fair = (price <= genre median) OR (value_score >= genre median)
+- Algorithm: DecisionTree(max_depth=8)
+- Train size: 59,217 | Test size: 14,805
+
+### Classification Report
+```
+              precision    recall  f1-score   support
+
+  Overpriced       0.94      0.93      0.93      6148
+        Fair       0.95      0.96      0.95      8657
+
+    accuracy                           0.95     14805
+   macro avg       0.94      0.94      0.94     14805
+weighted avg       0.95      0.95      0.95     14805
+
+```
