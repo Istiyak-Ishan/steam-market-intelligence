@@ -112,7 +112,7 @@ def _render_multi_radar(games: list[dict], all_medians: pd.Series) -> go.Figure:
     return fig
 
 
-def render(df: pd.DataFrame, models: dict | None = None) -> None:
+def render(df: pd.DataFrame, models: dict | None = None, hide_header: bool = False) -> None:
     st.markdown("""
     <div class="hero-header">
         <div class="hero-title">Game Comparison Engine</div>
