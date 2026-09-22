@@ -307,11 +307,10 @@ NAV_GROUPS = [
     ("", [
         ("🏠  Overview",               "overview"),
         ("📊  Market Insights",         "market_explorer"),
-        ("📈  Quality vs. Price",       "competitive_analysis"),
     ]),
     ("ML TOOLS", [
         ("🔮  Predict Tool",           "predict_tool"),
-        ("🔍  Feature Importance",      "advanced_analytics"),
+        ("🔍  Feature Importance",      "model_lab"),
         ("🗂️  Cluster Explorer",       "segmentation"),
     ]),
     ("GAME INTELLIGENCE", [
@@ -406,16 +405,12 @@ try:
         from app.pages.market_explorer import render
         render(df)
 
-    elif page_key == "competitive_analysis":
-        from app.pages.competitive_analysis import render
-        render(df, models)
-
     elif page_key == "predict_tool":
         from app.pages.predict_tool import render
         render(df, models)
 
-    elif page_key == "advanced_analytics":
-        from app.pages.advanced_analytics import render
+    elif page_key == "model_lab":
+        from app.pages.model_lab import render
         render(df, models)
 
     elif page_key == "segmentation":
@@ -438,7 +433,6 @@ try:
         from app.pages.methodology import render
         render(df)
 
-        
 except Exception as e:
     st.error(f"**Application Error:** An unexpected issue occurred while rendering this page.")
     st.error(f"`{str(e)}`")
