@@ -134,5 +134,3 @@ def get_cluster_profiles(df: pd.DataFrame) -> pd.DataFrame:
     """
     profile_cols = [c for c in SEGMENTATION_FEATURES if c in df.columns]
     return df.groupby(["cluster_id", "cluster_label"])[profile_cols].median().reset_index()
-    profile_cols = [c for c in SEGMENTATION_FEATURES if c in df.columns]
-    return df.groupby(["cluster_id", "cluster_label"])[profile_cols].median().reset_index()
