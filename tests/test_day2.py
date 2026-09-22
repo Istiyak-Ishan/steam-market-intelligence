@@ -15,7 +15,7 @@ import pytest
 
 from src.data_loader import load_data
 from src.feature_engineering import apply_all_features, build_model_input
-from src.config import MODEL_FEATURES, PRIMARY_GENRES
+from src.config import BASE_FEATURES, PRIMARY_GENRES
 from src.model_loader import predict_value_score, predict_price_tier
 from src.similarity import find_similar_games
 from src.benchmarks import percentile_profile
