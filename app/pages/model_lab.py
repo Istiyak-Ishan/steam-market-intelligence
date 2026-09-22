@@ -168,7 +168,7 @@ def _fair_price_analysis(tier_pred: str, proba: dict, actual_price: float, df: p
     """, unsafe_allow_html=True)
 
 
-def render(df: pd.DataFrame, models: dict) -> None:
+def render(df: pd.DataFrame, models: dict, hide_header: bool = False) -> None:
     st.markdown("""
     <div class="hero-header">
         <div class="hero-title">🔬 Model Lab</div>
