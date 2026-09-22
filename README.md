@@ -13,23 +13,35 @@ An empirically driven, machine-learning-backed analytical tool designed to help 
 
 ## Installation
 
-Clone the repository and install dependencies in a virtual environment:
+Clone the repository and navigate into the project directory:
 
 ```bash
 git clone https://github.com/Istiyak-Ishan/steam-market-intelligence.git
 cd steam-market-intelligence
+```
 
+### Windows
+```powershell
 # Create a virtual environment
 python -m venv venv
 
-# Activate the virtual environment
-# On Windows:
+# Activate the environment
 venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+```
+
+### Linux / macOS
+```bash
+# Create a virtual environment (you may need to use python3)
+python3 -m venv venv
+
+# Activate the environment
+source venv/bin/activate
+
+# Install dependencies
+pip3 install -r requirements.txt
 ```
 
 ## Usage
