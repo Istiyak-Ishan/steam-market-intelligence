@@ -284,11 +284,15 @@ def get_data():
 
 @st.cache_resource(show_spinner="Loading ML models…")
 def get_models():
-    from src.model_loader import load_price_value_model, load_price_tier_model, load_scaler
+    from src.model_loader import (
+        load_sweetspot_model, load_review_score_model,
+        load_value_score_model, load_ownership_model,
+    )
     return {
-        "regressor":  load_price_value_model(),
-        "classifier": load_price_tier_model(),
-        "scaler":     load_scaler(),
+        "sweetspot":   load_sweetspot_model(),
+        "review":      load_review_score_model(),
+        "value":       load_value_score_model(),
+        "ownership":   load_ownership_model(),
     }
 
 
@@ -401,18 +405,6 @@ try:
 
     elif page_key == "market_explorer":
         from app.pages.market_explorer import render
-        render(df)
-
-    elif page_key == "pricing_value":
-        from app.pages.pricing_value import render
-        render(df)
-
-    elif page_key == "audience_reach":
-        from app.pages.audience_reach import render
-        render(df, models)
-
-    elif page_key == "genre_benchmark":
-        from app.pages.genre_benchmark import render
         render(df)
 
     elif page_key == "game_analyzer":
