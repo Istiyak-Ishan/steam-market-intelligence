@@ -83,7 +83,7 @@ def load_scaler():
     return _safe_load(SCALER_PKL, "Feature Scaler")
 
 
-def predict_value_score(game_profile: dict) -> float:
+def predict_value_score(game_profile: dict, model_type: str = "Random Forest (Pre-trained)") -> float:
     """
     Predict value_score_calc for a game profile.
 
@@ -91,6 +91,7 @@ def predict_value_score(game_profile: dict) -> float:
     ----------
     game_profile : dict with keys matching MODEL_FEATURES
         All missing keys default to 0.
+    model_type : str, default "Random Forest (Pre-trained)"
 
     Returns
     -------
@@ -102,12 +103,22 @@ def predict_value_score(game_profile: dict) -> float:
     used only for the Logistic Regression baseline). We pass raw features.
     """
     from src.feature_engineering import build_model_input
-    model = load_price_value_model()
+    
+    if model_type == "Random Forest (Pre-trained)":
+        model = load_price_value_model()
+    else:
+        model = load_dynamic_value_model(model_type)
+        
     X = build_model_input(game_profile)
+    
+    if getattr(model, "is_scaled", False):
+        scaler = load_scaler()
+        X = scaler.transform(X)
+        
     return float(model.predict(X)[0])
 
 
-def predict_price_tier(game_profile: dict) -> tuple[str, dict[str, float]]:
+def predict_price_tier(game_profile: dict, model_type: str = "Random Forest (Pre-trained)") -> tuple[str, dict[str, float]]:
     """
     Predict the natural price tier for a game profile.
 
@@ -118,14 +129,91 @@ def predict_price_tier(game_profile: dict) -> tuple[str, dict[str, float]]:
         probabilities_dict : {class_label: probability float}
     """
     from src.feature_engineering import build_model_input
-    model = load_price_tier_model()
+    
+    if model_type == "Random Forest (Pre-trained)":
+        model = load_price_tier_model()
+    else:
+        model = load_dynamic_tier_model(model_type)
+        
     X = build_model_input(game_profile)
+    if getattr(model, "is_scaled", False):
+        scaler = load_scaler()
+        X = scaler.transform(X)
+        
     tier = str(model.predict(X)[0])
-    proba = model.predict_proba(X)[0]
-    proba_dict = {str(c): round(float(p), 4) for c, p in zip(model.classes_, proba)}
+    
+    if hasattr(model, "predict_proba"):
+        proba = model.predict_proba(X)[0]
+        proba_dict = {str(c): round(float(p), 4) for c, p in zip(model.classes_, proba)}
+    else:
+        proba_dict = {tier: 1.0}
+        
     return tier, proba_dict
 
 
 def validate_model_features_match(df: pd.DataFrame) -> bool:
     """Return True if all MODEL_FEATURES columns are present in df."""
     return all(f in df.columns for f in MODEL_FEATURES)
+
+
+@st.cache_resource(show_spinner=False)
+def load_dynamic_tier_model(model_type="Decision Tree"):
+    from src.data_loader import load_data
+    from src.feature_engineering import apply_all_features
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.linear_model import LogisticRegression
+    
+    df = load_data()
+    df = apply_all_features(df)
+    train_df = df[df["price"] > 0].dropna(subset=MODEL_FEATURES + ["price_tier"]).copy()
+    X = train_df[MODEL_FEATURES]
+    y = train_df["price_tier"]
+    
+    if model_type == "Decision Tree":
+        model = DecisionTreeClassifier(max_depth=10, random_state=42)
+    elif model_type in ["Logistic Regression", "Linear/Logistic Regression"]:
+        # Scale for Logistic Regression
+        scaler = load_scaler()
+        X_scaled = scaler.transform(X)
+        model = LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42)
+        model.fit(X_scaled, y)
+        model.is_scaled = True
+        return model
+    
+    model.fit(X, y)
+    model.is_scaled = False
+    return model
+
+
+@st.cache_resource(show_spinner=False)
+def load_dynamic_value_model(model_type="Decision Tree"):
+    from src.data_loader import load_data
+    from src.feature_engineering import apply_all_features
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.linear_model import LinearRegression
+    
+    df = load_data()
+    df = apply_all_features(df)
+    train_df = df[df["price"] > 0].dropna(subset=MODEL_FEATURES + ["value_score_calc"]).copy()
+    
+    # Cap target outliers for regression stability
+    target = train_df["value_score_calc"]
+    cap = target.quantile(0.99)
+    train_df["value_score_calc"] = target.clip(upper=cap)
+    
+    X = train_df[MODEL_FEATURES]
+    y = train_df["value_score_calc"]
+    
+    if model_type == "Decision Tree":
+        model = DecisionTreeRegressor(max_depth=10, random_state=42)
+    elif model_type in ["Linear Regression", "Linear/Logistic Regression"]:
+        scaler = load_scaler()
+        X_scaled = scaler.transform(X)
+        model = LinearRegression()
+        model.fit(X_scaled, y)
+        model.is_scaled = True
+        return model
+        
+    model.fit(X, y)
+    model.is_scaled = False
+    return model
