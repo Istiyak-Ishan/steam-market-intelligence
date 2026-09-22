@@ -21,8 +21,9 @@ def _L(**kw) -> dict:
     base.update(kw)
     return base
 
-def render(df: pd.DataFrame) -> None:
-    st.markdown('<div class="hero-header"><div class="hero-title">👥 Player & Discovery</div><div class="hero-subtitle">Engagement, reach, and community discovery cross-metrics.</div></div>', unsafe_allow_html=True)
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
+    if not hide_header:
+        st.markdown('<div class="hero-header"><div class="hero-title">👥 Player & Discovery</div><div class="hero-subtitle">Engagement, reach, and community discovery cross-metrics.</div></div>', unsafe_allow_html=True)
     
     # ── Row 1: Base Metrics Dashboard ─────────────────────────────────────────
     st.markdown('<div class="section-header">Global Base Metrics</div>', unsafe_allow_html=True)
