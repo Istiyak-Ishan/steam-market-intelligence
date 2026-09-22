@@ -21,8 +21,9 @@ def _L(**kw) -> dict:
     base.update(kw)
     return base
 
-def render(df: pd.DataFrame) -> None:
-    st.markdown('<div class="hero-header"><div class="hero-title">🌍 Platform & Global</div><div class="hero-subtitle">Operating system coverage and localization analytics.</div></div>', unsafe_allow_html=True)
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
+    if not hide_header:
+        st.markdown('<div class="hero-header"><div class="hero-title">🌍 Platform & Global</div><div class="hero-subtitle">Operating system coverage and localization analytics.</div></div>', unsafe_allow_html=True)
     
     # Pre-process platform combinations
     df_plat = df.copy()
