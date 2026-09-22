@@ -15,15 +15,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 
 from src.config import CLEANED_CSV, GENRE_PIVOT_CSV, MIN_GENRE_GAMES
 
 log = logging.getLogger(__name__)
-
-# ── Internal cache (module-level, not Streamlit) ─────────────────────────────
-_df_cache: pd.DataFrame | None = None
-
-
 def _load_raw() -> pd.DataFrame:
     """Load and type-coerce steam_games_cleaned.csv exactly once."""
     path = Path(CLEANED_CSV)
@@ -103,12 +99,10 @@ def _load_raw() -> pd.DataFrame:
     return df
 
 
-def load_data(force_reload: bool = False) -> pd.DataFrame:
-    """Return the cleaned dataset.  Cached after first load."""
-    global _df_cache
-    if _df_cache is None or force_reload:
-        _df_cache = _load_raw()
-    return _df_cache.copy()
+@st.cache_data(show_spinner=False)
+def load_data() -> pd.DataFrame:
+    """Return the cleaned dataset.  Cached by Streamlit."""
+    return _load_raw()
 
 
 def load_genre_pivot() -> pd.DataFrame:

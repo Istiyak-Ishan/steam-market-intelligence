@@ -17,15 +17,11 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
+import streamlit as st
 
 from src.config import REGRESSOR_PKL, CLASSIFIER_PKL, SCALER_PKL, MODEL_FEATURES
 
 log = logging.getLogger(__name__)
-
-# ── Cache ─────────────────────────────────────────────────────────────────────
-_regressor  = None
-_classifier = None
-_scaler     = None
 
 
 class ModelLoadError(Exception):
@@ -53,6 +49,7 @@ def _safe_load(path: Path, label: str) -> Any:
     return obj
 
 
+@st.cache_resource(show_spinner=False)
 def load_price_value_model():
     """
     Load the Random Forest Regressor that predicts value_score_calc.
@@ -60,12 +57,10 @@ def load_price_value_model():
     Input: 12 features in MODEL_FEATURES order
     Returns: fitted sklearn RandomForestRegressor
     """
-    global _regressor
-    if _regressor is None:
-        _regressor = _safe_load(REGRESSOR_PKL, "Price-Value Regressor")
-    return _regressor
+    return _safe_load(REGRESSOR_PKL, "Price-Value Regressor")
 
 
+@st.cache_resource(show_spinner=False)
 def load_price_tier_model():
     """
     Load the Random Forest Classifier that predicts price tier.
@@ -73,12 +68,10 @@ def load_price_tier_model():
     Input: 12 features in MODEL_FEATURES order (Free games were excluded from training)
     Returns: fitted sklearn RandomForestClassifier
     """
-    global _classifier
-    if _classifier is None:
-        _classifier = _safe_load(CLASSIFIER_PKL, "Price Tier Classifier")
-    return _classifier
+    return _safe_load(CLASSIFIER_PKL, "Price Tier Classifier")
 
 
+@st.cache_resource(show_spinner=False)
 def load_scaler():
     """
     Load the StandardScaler fitted on the 12 model features.
@@ -87,10 +80,7 @@ def load_scaler():
     time—the scaler was used only for the LogisticRegression baseline in the
     notebook. The RF models use raw feature values directly.
     """
-    global _scaler
-    if _scaler is None:
-        _scaler = _safe_load(SCALER_PKL, "Feature Scaler")
-    return _scaler
+    return _safe_load(SCALER_PKL, "Feature Scaler")
 
 
 def predict_value_score(game_profile: dict) -> float:
