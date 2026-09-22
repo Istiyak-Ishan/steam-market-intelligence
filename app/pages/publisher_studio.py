@@ -23,8 +23,13 @@ from src.config import (
     PLOTLY_BG_COLOR,
     PLOTLY_PAPER_BG,
     PRICE_TIER_LABELS,
+    MODEL_FEATURES,
 )
-from src.model_loader import predict_price_tier, predict_value_score
+from src.model_loader import (
+    predict_price_tier, predict_value_score,
+    load_price_tier_model, load_price_value_model,
+    load_dynamic_tier_model, load_dynamic_value_model
+)
 from src.similarity import find_similar_games
 from src.market_position import compute_market_gap_signal, game_market_position
 
@@ -197,6 +202,13 @@ def render(df: pd.DataFrame, models: dict) -> None:
     # ── Preset Loader ──
     preset_choice = st.selectbox("Load Predefined Scenario Template:", list(PRESETS.keys()), key="studio_preset_select")
     preset = PRESETS.get(preset_choice)
+    
+    model_choice = st.selectbox(
+        "Active Machine Learning Model:", 
+        ["Random Forest (Pre-trained)", "Decision Tree", "Linear/Logistic Regression"], 
+        index=0, 
+        key="studio_model_select"
+    )
 
     # ── Dual Input UI ──
     st.markdown('<div class="section-header">Game Concept Inputs</div>', unsafe_allow_html=True)
@@ -271,11 +283,12 @@ def render(df: pd.DataFrame, models: dict) -> None:
     a_profile = build_profile(a_price, a_rev, a_plat, a_lang, a_playtime, a_total_rev, a_peak_ccu) if enable_alt else b_profile
 
     # Live Predictions
-    b_val_score = predict_value_score(b_profile)
-    b_tier_pred, b_proba = predict_price_tier(b_profile)
+    # Live Predictions
+    b_val_score = predict_value_score(b_profile, model_type=model_choice)
+    b_tier_pred, b_proba = predict_price_tier(b_profile, model_type=model_choice)
     
-    a_val_score = predict_value_score(a_profile)
-    a_tier_pred, a_proba = predict_price_tier(a_profile)
+    a_val_score = predict_value_score(a_profile, model_type=model_choice)
+    a_tier_pred, a_proba = predict_price_tier(a_profile, model_type=model_choice)
 
     # ── Outputs ──
     st.markdown('<div class="section-header">Market Alignment & ML Predictions</div>', unsafe_allow_html=True)
@@ -321,7 +334,7 @@ def render(df: pd.DataFrame, models: dict) -> None:
     </div>
     """, unsafe_allow_html=True)
 
-    tab_radar, tab_pos, tab_sim = st.tabs(["📊 Radar & Benchmarks", "🗺️ Market Position", "🎮 Comparable Games"])
+    tab_radar, tab_pos, tab_sim, tab_drivers = st.tabs(["📊 Radar & Benchmarks", "🗺️ Market Position", "🎮 Comparable Games", "📈 Prediction Drivers"])
 
     with tab_radar:
         c1, c2 = st.columns([1.1, 0.9])
@@ -414,3 +427,49 @@ def render(df: pd.DataFrame, models: dict) -> None:
                 st.info("No matching similar titles found.")
         except Exception as e:
             st.warning(f"Unable to retrieve similar titles: {e}")
+    with tab_drivers:
+        st.markdown("**Machine Learning Prediction Drivers**")
+        st.write("This section breaks down *why* the active model predicted its Base values.")
+        
+        col_reg, col_clf = st.columns(2)
+        
+        with col_reg:
+            st.markdown("**Value Score Drivers (Regression)**")
+            if model_choice == "Random Forest (Pre-trained)":
+                model_v = load_price_value_model()
+            else:
+                model_v = load_dynamic_value_model(model_choice)
+                
+            if hasattr(model_v, 'feature_importances_'):
+                importances = model_v.feature_importances_
+                imp_df = pd.DataFrame({'Feature': MODEL_FEATURES, 'Importance': importances}).sort_values('Importance', ascending=True)
+                fig_v = px.bar(imp_df, x='Importance', y='Feature', orientation='h', title=f"{model_choice} Importances")
+                st.plotly_chart(fig_v, use_container_width=True)
+            elif hasattr(model_v, 'coef_'):
+                coefs = model_v.coef_
+                imp_df = pd.DataFrame({'Feature': MODEL_FEATURES, 'Coefficient': coefs}).sort_values('Coefficient', ascending=True)
+                fig_v = px.bar(imp_df, x='Coefficient', y='Feature', orientation='h', title=f"{model_choice} Coefficients", color='Coefficient', color_continuous_scale='RdBu')
+                st.plotly_chart(fig_v, use_container_width=True)
+            else:
+                st.write("Drivers not extractable for this model.")
+
+        with col_clf:
+            st.markdown("**Price Tier Drivers (Classification)**")
+            if model_choice == "Random Forest (Pre-trained)":
+                model_c = load_price_tier_model()
+            else:
+                model_c = load_dynamic_tier_model(model_choice)
+                
+            if hasattr(model_c, 'feature_importances_'):
+                importances = model_c.feature_importances_
+                imp_df = pd.DataFrame({'Feature': MODEL_FEATURES, 'Importance': importances}).sort_values('Importance', ascending=True)
+                fig_c = px.bar(imp_df, x='Importance', y='Feature', orientation='h', title=f"{model_choice} Importances")
+                st.plotly_chart(fig_c, use_container_width=True)
+            elif hasattr(model_c, 'coef_'):
+                # Logistic regression multiclass
+                coefs = np.mean(np.abs(model_c.coef_), axis=0)
+                imp_df = pd.DataFrame({'Feature': MODEL_FEATURES, 'Mean Abs Coefficient': coefs}).sort_values('Mean Abs Coefficient', ascending=True)
+                fig_c = px.bar(imp_df, x='Mean Abs Coefficient', y='Feature', orientation='h', title=f"{model_choice} Feature Impact (Mean Abs)")
+                st.plotly_chart(fig_c, use_container_width=True)
+            else:
+                st.write("Drivers not extractable for this model.")
