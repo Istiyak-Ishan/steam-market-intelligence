@@ -114,7 +114,7 @@ def _render_comparison_radar(target_row: dict, competitor_rows: list[dict], all_
     return fig
 
 
-def render(df: pd.DataFrame) -> None:
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
     st.markdown("""
     <div class="hero-header">
         <div class="hero-title">Similar Game Finder & Competitor Intelligence</div>
