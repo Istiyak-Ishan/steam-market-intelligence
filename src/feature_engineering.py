@@ -276,6 +276,6 @@ def build_model_input(game_profile: dict) -> pd.DataFrame:
         full_audio_languages_count, is_indie, average_playtime_forever,
         cat_single_player
     """
-    from src.config import MODEL_FEATURES
-    row = {f: float(game_profile.get(f, 0)) for f in MODEL_FEATURES}
-    return pd.DataFrame([row])[MODEL_FEATURES]
+    from src.config import BASE_FEATURES
+    row = {f: float(game_profile.get(f, 0)) for f in BASE_FEATURES}
+    return pd.DataFrame([row])[BASE_FEATURES]
