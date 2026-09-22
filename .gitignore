@@ -1,0 +1,12 @@
+venv/
+env/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+.env
+secrets.toml
+.DS_Store
+
+# Ignore large datasets if needed (Note: If smaller than 100MB and required, remove these)
+# data/*.csv
+# models/*.pkl
