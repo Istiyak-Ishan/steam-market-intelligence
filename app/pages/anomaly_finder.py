@@ -58,7 +58,7 @@ def compute_isolation_forest_anomalies(df: pd.DataFrame, contamination: float = 
     return clean[clean["is_anomaly"]].sort_values("anomaly_score", ascending=False).reset_index(drop=True)
 
 
-def render(df: pd.DataFrame) -> None:
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
     st.markdown("""
     <div class="hero-header">
         <div class="hero-title">Statistical & ML Anomaly Finder</div>
