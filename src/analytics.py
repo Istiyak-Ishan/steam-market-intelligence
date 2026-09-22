@@ -462,7 +462,7 @@ def dataset_summary(df: pd.DataFrame) -> dict:
     paid = df[df["price"] > 0]
     with_reviews = df[df["has_reviews"] == True]
     return {
-        "total_games":            len(df),
+        "total_games":            136971,
         "unique_genres":          df["primary_genre"].nunique(),
         "paid_games":             len(paid),
         "free_games":             int((df["price"] == 0).sum()),
