@@ -29,8 +29,7 @@ MODELING_ROW_COUNT = 57_685    # commercial titles used for model training (pric
 # That explains the "126,130" figure in the executive report: it is a genre-filtered EDA subset.
 
 # ── Model feature columns (exact order as trained) ───────────────────────────
-MODEL_FEATURES = [
-    "quality_score",              # review_score_pct × 100
+BASE_FEATURES = [
     "age_by_years",               # game age in fractional years
     "categories_count",           # number of Steam categories
     "languages_count",            # number of supported languages

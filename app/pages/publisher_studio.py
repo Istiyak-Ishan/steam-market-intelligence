@@ -27,8 +27,7 @@ from src.config import (
 )
 from src.model_loader import (
     predict_price_tier, predict_value_score, predict_price_sweetspot,
-    load_price_tier_model, load_price_value_model,
-    load_dynamic_tier_model, load_dynamic_value_model
+    predict_review_score, predict_ownership
 )
 from src.similarity import find_similar_games
 from src.market_position import compute_market_gap_signal, game_market_position
@@ -257,21 +256,8 @@ def render(df: pd.DataFrame, models: dict) -> None:
     preset_choice = st.selectbox("Load Predefined Scenario Template:", list(PRESETS.keys()), key="studio_preset_select")
     preset = PRESETS.get(preset_choice)
     
-    model_choice = st.selectbox(
-        "Active Machine Learning Model:", 
-        ["Random Forest (Pre-trained)", "Decision Tree", "Linear/Logistic Regression"], 
-        index=0, 
-        key="studio_model_select"
-    )
-    
-    if model_choice == "Random Forest (Pre-trained)":
-        st.caption("⚡ **Random Forest:** Pre-trained. (Historical Accuracy: ~85%, R²: ~0.78)")
-    else:
-        m_tier = load_dynamic_tier_model(model_choice)
-        m_val = load_dynamic_value_model(model_choice)
-        acc = getattr(m_tier, "training_score", 0.0) * 100
-        r2 = getattr(m_val, "training_score", 0.0)
-        st.caption(f"⚡ **{model_choice}:** Dynamically trained. (Training Accuracy: {acc:.1f}%, R²: {r2:.2f})")
+    # ── High Precision Models ──
+    st.info("⚡ **Precision Models Active:** Predictions are powered by offline-trained HistGradientBoosting regressors.")
 
     # ── Dual Input UI ──
     st.markdown('<div class="section-header">Game Concept Inputs</div>', unsafe_allow_html=True)
@@ -345,13 +331,17 @@ def render(df: pd.DataFrame, models: dict) -> None:
     b_profile = build_profile(b_price, b_rev, b_plat, b_lang, b_playtime, b_total_rev, b_peak_ccu)
     a_profile = build_profile(a_price, a_rev, a_plat, a_lang, a_playtime, a_total_rev, a_peak_ccu) if enable_alt else b_profile
 
-    b_val_score = predict_value_score(b_profile, model_type=model_choice)
-    b_tier_pred, b_proba = predict_price_tier(b_profile, model_type=model_choice)
-    b_price_sweetspot = predict_price_sweetspot(b_profile, model_type=model_choice)
+    b_val_score = predict_value_score(b_profile)
+    b_tier_pred, b_proba = predict_price_tier(b_profile)
+    b_price_sweetspot = predict_price_sweetspot(b_profile)
+    b_expected_review = predict_review_score(b_profile, b_price)
+    b_expected_owners = predict_ownership(b_profile, b_price)
     
-    a_val_score = predict_value_score(a_profile, model_type=model_choice)
-    a_tier_pred, a_proba = predict_price_tier(a_profile, model_type=model_choice)
-    a_price_sweetspot = predict_price_sweetspot(a_profile, model_type=model_choice)
+    a_val_score = predict_value_score(a_profile)
+    a_tier_pred, a_proba = predict_price_tier(a_profile)
+    a_price_sweetspot = predict_price_sweetspot(a_profile)
+    a_expected_review = predict_review_score(a_profile, a_price)
+    a_expected_owners = predict_ownership(a_profile, a_price)
 
     # ── Outputs ──
     st.markdown('<div class="section-header">Market Alignment & ML Predictions</div>', unsafe_allow_html=True)
@@ -375,22 +365,21 @@ def render(df: pd.DataFrame, models: dict) -> None:
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        st.metric("Base Value Score (Actual)", f"{b_actual_val:.2f} pts/$" if b_price > 0 else "∞ (Free)")
+        st.metric("Expected Review Score", f"{b_expected_review:.1f}%")
     with k2:
         if enable_alt:
-            val_delta = a_actual_val - b_actual_val if (b_price > 0 and a_price > 0) else None
-            st.metric("Alt Value Score (Actual)", f"{a_actual_val:.2f} pts/$" if a_price > 0 else "∞", delta=f"{val_delta:.2f}" if val_delta is not None else None)
+            delta_rev = a_expected_review - b_expected_review
+            st.metric("Alt Expected Review", f"{a_expected_review:.1f}%", delta=f"{delta_rev:.1f}%")
         else:
-            st.metric("Alt Value Score (Actual)", "N/A")
-            
+            st.metric("Alt Expected Review", "-")
     with k3:
-        st.metric("Base Value Score (ML Expected)", f"{b_val_score:.2f} pts/$", help="What the market historically expects from a game with this scope (independent of your set price).")
+        st.metric("Expected Ownership Reach", f"{int(b_expected_owners):,}")
     with k4:
         if enable_alt:
-            val_delta_ml = a_val_score - b_val_score
-            st.metric("Alt Value Score (ML Expected)", f"{a_val_score:.2f} pts/$", delta=f"{val_delta_ml:.2f}")
+            delta_own = a_expected_owners - b_expected_owners
+            st.metric("Alt Expected Reach", f"{int(a_expected_owners):,}", delta=f"{int(delta_own):,}")
         else:
-            st.metric("Alt Value Score (ML Expected)", "N/A")
+            st.metric("Alt Expected Reach", "-")
 
     st.markdown("---")
     t1, t2 = st.columns(2)
