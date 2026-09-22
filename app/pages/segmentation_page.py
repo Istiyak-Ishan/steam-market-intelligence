@@ -165,7 +165,7 @@ def _make_scatter(seg_df: pd.DataFrame, x: str, y: str, color_col: str = "cluste
 
 # ── Main render ───────────────────────────────────────────────────────────────
 
-def render(df: pd.DataFrame) -> None:
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
     st.markdown("""
     <div class="hero-header">
         <div class="hero-title">🧩 Market Segmentation</div>
