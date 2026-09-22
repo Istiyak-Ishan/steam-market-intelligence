@@ -63,7 +63,7 @@ html, body, [class*="css"], .stMarkdown, .stText, p {
     color: var(--text-primary);
 }
 
-header {visibility: hidden;}
+/* Hide default Streamlit elements except the header (which contains the sidebar toggle) */
 footer {visibility: hidden;}
 #MainMenu {visibility: hidden;}
 
