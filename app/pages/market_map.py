@@ -71,8 +71,9 @@ def _get_scatter(df: pd.DataFrame, x_col: str, y_col: str, x_label: str, y_label
 
     return fig
 
-def render(df: pd.DataFrame) -> None:
-    st.markdown('<div class="hero-header"><div class="hero-title">🗺️ Market Map</div><div class="hero-subtitle">Interactive multidimensional scatter analysis across the commercial landscape. (Size = Ownership, Color = Genre)</div></div>', unsafe_allow_html=True)
+def render(df: pd.DataFrame, hide_header: bool = False) -> None:
+    if not hide_header:
+        st.markdown('<div class="hero-header"><div class="hero-title">🗺️ Market Map</div><div class="hero-subtitle">Interactive multidimensional scatter analysis across the commercial landscape. (Size = Ownership, Color = Genre)</div></div>', unsafe_allow_html=True)
     
     with st.expander("🔍 Filters & Highlighting", expanded=True):
         c1, c2, c3 = st.columns(3)
