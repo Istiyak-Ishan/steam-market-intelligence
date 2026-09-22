@@ -26,7 +26,7 @@ from src.config import (
     MODEL_FEATURES,
 )
 from src.model_loader import (
-    predict_price_tier, predict_value_score,
+    predict_price_tier, predict_value_score, predict_price_sweetspot,
     load_price_tier_model, load_price_value_model,
     load_dynamic_tier_model, load_dynamic_value_model
 )
@@ -105,6 +105,60 @@ PRESETS = {
         "playtime": 90,
         "age_years": 0.5,
     },
+    "AAA Open World RPG": {
+        "name": "Elden Realms",
+        "genre": "RPG",
+        "price": 59.99,
+        "review_pct": 92,
+        "platforms": ["Windows"],
+        "languages": 12,
+        "audio_lang": 5,
+        "categories": 8,
+        "is_single": True,
+        "is_indie": False,
+        "is_casual": False,
+        "genre_count": 3,
+        "peak_ccu": 150000,
+        "total_rev": 120000,
+        "playtime": 4500,
+        "age_years": 0.2,
+    },
+    "Multiplayer Co-op Shooter": {
+        "name": "Strike Force: Elite",
+        "genre": "Action",
+        "price": 29.99,
+        "review_pct": 75,
+        "platforms": ["Windows", "Mac"],
+        "languages": 15,
+        "audio_lang": 8,
+        "categories": 7,
+        "is_single": False,
+        "is_indie": False,
+        "is_casual": False,
+        "genre_count": 2,
+        "peak_ccu": 45000,
+        "total_rev": 15000,
+        "playtime": 1200,
+        "age_years": 0.1,
+    },
+    "Hardcore Strategy Simulator": {
+        "name": "Stellar Conquest",
+        "genre": "Strategy",
+        "price": 39.99,
+        "review_pct": 89,
+        "platforms": ["Windows", "Linux"],
+        "languages": 8,
+        "audio_lang": 1,
+        "categories": 4,
+        "is_single": True,
+        "is_indie": True,
+        "is_casual": False,
+        "genre_count": 2,
+        "peak_ccu": 8500,
+        "total_rev": 4500,
+        "playtime": 3500,
+        "age_years": 1.0,
+    }
 }
 
 def _render_dual_radar(base_vals: dict, alt_vals: dict, df: pd.DataFrame, genre: str) -> go.Figure:
@@ -209,6 +263,15 @@ def render(df: pd.DataFrame, models: dict) -> None:
         index=0, 
         key="studio_model_select"
     )
+    
+    if model_choice == "Random Forest (Pre-trained)":
+        st.caption("⚡ **Random Forest:** Pre-trained. (Historical Accuracy: ~85%, R²: ~0.78)")
+    else:
+        m_tier = load_dynamic_tier_model(model_choice)
+        m_val = load_dynamic_value_model(model_choice)
+        acc = getattr(m_tier, "training_score", 0.0) * 100
+        r2 = getattr(m_val, "training_score", 0.0)
+        st.caption(f"⚡ **{model_choice}:** Dynamically trained. (Training Accuracy: {acc:.1f}%, R²: {r2:.2f})")
 
     # ── Dual Input UI ──
     st.markdown('<div class="section-header">Game Concept Inputs</div>', unsafe_allow_html=True)
@@ -222,16 +285,16 @@ def render(df: pd.DataFrame, models: dict) -> None:
             b_genre = st.selectbox("Primary Genre", PRIMARY_GENRES, index=g_idx, key="b_genre")
             
             c1, c2 = st.columns(2)
-            with c1: b_price = st.number_input("Base Price ($)", 0.0, 99.99, float(preset["price"]) if preset else 14.99, 0.50, key="b_price")
-            with c2: b_rev = st.slider("Expected Quality (%)", 10, 100, int(preset["review_pct"]) if preset else 78, key="b_rev")
+            with c1: b_price = st.number_input("Base Price ($)", 0.0, 99.99, float(preset["price"]) if preset else 14.99, 0.50, key="b_price", help="The target retail price in USD.")
+            with c2: b_rev = st.slider("Expected Quality (%)", 10, 100, int(preset["review_pct"]) if preset else 78, key="b_rev", help="Expected percentage of positive Steam reviews (approximates quality).")
             
             c3, c4 = st.columns(2)
-            with c3: b_plat = st.slider("Platforms (Count)", 1, 3, len(preset["platforms"]) if preset else 1, key="b_plat")
-            with c4: b_lang = st.slider("Languages (Count)", 1, 30, int(preset["languages"]) if preset else 6, key="b_lang")
+            with c3: b_plat = st.slider("Platforms (Count)", 1, 3, len(preset["platforms"]) if preset else 1, key="b_plat", help="Number of OS platforms supported (Windows, Mac, Linux).")
+            with c4: b_lang = st.slider("Languages (Count)", 1, 30, int(preset["languages"]) if preset else 6, key="b_lang", help="Number of localized text languages supported.")
             
-            b_playtime = st.number_input("Avg Playtime (min)", 0, 10000, int(preset["playtime"]) if preset else 360, 60, key="b_play")
-            b_total_rev = st.number_input("Expected Steam Reviews", 0, 500000, int(preset["total_rev"]) if preset else 350, 50, key="b_trev")
-            b_peak_ccu = st.number_input("Expected Peak CCU", 0, 1000000, int(preset["peak_ccu"]) if preset else 600, 50, key="b_ccu")
+            b_playtime = st.number_input("Avg Playtime (min)", 0, 10000, int(preset["playtime"]) if preset else 360, 60, key="b_play", help="Expected average playtime across all users, in minutes.")
+            b_total_rev = st.number_input("Expected Steam Reviews", 0, 500000, int(preset["total_rev"]) if preset else 350, 50, key="b_trev", help="Expected total volume of Steam reviews (proxy for sales volume).")
+            b_peak_ccu = st.number_input("Expected Peak CCU", 0, 1000000, int(preset["peak_ccu"]) if preset else 600, 50, key="b_ccu", help="Expected peak Concurrent Users (how many playing at the same time).")
 
     with col_alt:
         st.markdown("**Alternative Scenario (What-If)**", unsafe_allow_html=True)
@@ -282,17 +345,28 @@ def render(df: pd.DataFrame, models: dict) -> None:
     b_profile = build_profile(b_price, b_rev, b_plat, b_lang, b_playtime, b_total_rev, b_peak_ccu)
     a_profile = build_profile(a_price, a_rev, a_plat, a_lang, a_playtime, a_total_rev, a_peak_ccu) if enable_alt else b_profile
 
-    # Live Predictions
-    # Live Predictions
     b_val_score = predict_value_score(b_profile, model_type=model_choice)
     b_tier_pred, b_proba = predict_price_tier(b_profile, model_type=model_choice)
+    b_price_sweetspot = predict_price_sweetspot(b_profile, model_type=model_choice)
     
     a_val_score = predict_value_score(a_profile, model_type=model_choice)
     a_tier_pred, a_proba = predict_price_tier(a_profile, model_type=model_choice)
+    a_price_sweetspot = predict_price_sweetspot(a_profile, model_type=model_choice)
 
     # ── Outputs ──
     st.markdown('<div class="section-header">Market Alignment & ML Predictions</div>', unsafe_allow_html=True)
     
+    s1, s2 = st.columns(2)
+    with s1:
+        st.metric("🎯 Suggested Base Price Sweetspot", f"${b_price_sweetspot:.2f}")
+        st.caption(f"⚠️ Maximum Recommended Ceiling: **${b_price_sweetspot * 1.15:.2f}**")
+    with s2:
+        if enable_alt:
+            delta_price = a_price_sweetspot - b_price_sweetspot
+            st.metric("🎯 Suggested Alt Price Sweetspot", f"${a_price_sweetspot:.2f}", delta=f"${delta_price:.2f}")
+            st.caption(f"⚠️ Alt Maximum Ceiling: **${a_price_sweetspot * 1.15:.2f}**")
+            
+    st.markdown("---")
     b_actual_val = (float(b_rev) / float(b_price)) if float(b_price) > 0 else float('inf')
     if enable_alt:
         a_actual_val = (float(a_rev) / float(a_price)) if float(a_price) > 0 else float('inf')
