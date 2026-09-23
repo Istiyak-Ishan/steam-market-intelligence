@@ -111,22 +111,22 @@ def render(df=None, models=None, **kwargs) -> None:
             st.info("Dataset not available for correlation analysis.")
 
         st.markdown("---")
-        st.markdown('<div class="section-header">2. Tree-based Feature Importance (Price Tier Classifier)</div>', unsafe_allow_html=True)
-        st.caption("Computed live from the trained HistGradientBoostingClassifier model.")
+        st.markdown('<div class="section-header">2. Tree-based Feature Importance (Fair Price Classifier)</div>', unsafe_allow_html=True)
+        st.caption("Computed live from the trained DecisionTreeClassifier model.")
 
         try:
             import joblib
-            clf_path = Path(MODELS_DIR) / "model_price_tier_clf.pkl"
-            if clf_path.exists():
-                model = joblib.load(clf_path)
+            fp_clf_path = Path(MODELS_DIR) / "model_fair_price_clf.pkl"
+            if fp_clf_path.exists():
+                fair_clf = joblib.load(fp_clf_path)
                 from src.config import BASE_FEATURES
-                features = BASE_FEATURES
+                # Fair price clf was trained on BASE_FEATURES + ["price"]
+                feat_names = BASE_FEATURES + ["price"]
 
-                # HistGradientBoosting exposes feature_importances_ 
-                if hasattr(model, "feature_importances_"):
+                if hasattr(fair_clf, "feature_importances_"):
                     fi = pd.DataFrame({
-                        "feature": features[:len(model.feature_importances_)],
-                        "importance": model.feature_importances_,
+                        "feature": feat_names[:len(fair_clf.feature_importances_)],
+                        "importance": fair_clf.feature_importances_,
                     }).sort_values("importance", ascending=True)
 
                     fig_fp = px.bar(
@@ -137,15 +137,15 @@ def render(df=None, models=None, **kwargs) -> None:
                         labels={"importance": "Gini Importance", "feature": "Feature"},
                     )
                     fig_fp.update_layout(**_layout(
-                        title="Feature Importance — Price Tier Classifier",
+                        title="Feature Importance — Fair Price Classifier (DecisionTree)",
                         coloraxis_showscale=False,
-                        height=400,
+                        height=430,
                     ))
                     st.plotly_chart(fig_fp, use_container_width=True)
                 else:
-                    st.info("This model type does not expose direct feature importances. See the Permutation Importance section below for a model-agnostic view.")
+                    st.info("Model does not expose feature importances.")
             else:
-                st.warning("Price tier classifier model file not found.")
+                st.warning("Fair price classifier model file not found.")
         except Exception as e:
             st.warning(f"Could not compute feature importances: {e}")
 
@@ -165,15 +165,16 @@ def render(df=None, models=None, **kwargs) -> None:
                     with st.spinner("Computing permutation importance on a 500-game sample…"):
                         own_model = joblib.load(own_path)
 
-                        features = BASE_FEATURES
+                        # Ownership model was trained on BASE_FEATURES + ["price"]
+                        own_features = BASE_FEATURES + ["price"]
                         sample = df[
-                            df["owners_mid"].notna() & df["review_score_pct"].notna()
+                            df["owners_mid"].notna() & df["review_score_pct"].notna() & df["price"].notna()
                         ].sample(min(500, len(df)), random_state=42)
 
-                        X = sample[[f for f in features if f in sample.columns]].fillna(0)
+                        X = sample[[f for f in own_features if f in sample.columns]].fillna(0)
                         y = np.log1p(sample["owners_mid"].fillna(0))
 
-                        feat_used = [f for f in features if f in X.columns]
+                        feat_used = [f for f in own_features if f in X.columns]
                         X = X[feat_used]
 
                         result = permutation_importance(own_model, X, y, n_repeats=5, random_state=42)
