@@ -63,7 +63,7 @@ def render(df: pd.DataFrame, models: dict = None, **kwargs) -> None:
     hide_header = kwargs.get("hide_header", False)
     if not hide_header:
         st.markdown(
-            '<div class="hero-header"><div class="hero-title">🔮 Predict Tool</div>'
+            '<div class="hero-header"><div class="hero-title">Predict Tool</div>'
             '<div class="hero-subtitle">Enter a game configuration and get simultaneous ML predictions: value score, price tier, and fair-price verdict.</div></div>',
             unsafe_allow_html=True,
         )

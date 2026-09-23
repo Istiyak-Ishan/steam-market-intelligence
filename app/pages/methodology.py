@@ -11,7 +11,7 @@ from src.config import PROJECT_ROOT
 def render(df=None, models=None) -> None:
     st.markdown("""
     <div class="hero-header">
-        <div class="hero-title">📖 EDA Notebook</div>
+        <div class="hero-title">EDA Notebook</div>
         <div class="hero-subtitle">
             Direct interactive export of the foundational Exploratory Data Analysis (EDA) process. 
             Each section includes auto-generated key findings derived from the raw data.

@@ -103,7 +103,7 @@ def _genre_price_boxplot(fdf: pd.DataFrame) -> go.Figure:
         ))
     fig.update_layout(
         **_L(title="Price Distribution by Genre ($0–$80, paid)", margin=dict(t=52, r=16, b=40, l=110)),
-        xaxis=dict(title="Price (USD)", showgrid=True, gridcolor="#1e2030"),
+        xaxis=dict(title="Price (USD)", showgrid=True, gridcolor="#151525"),
         yaxis=dict(title="", showgrid=False),
         height=max(380, len(genres) * 28 + 80),
     )
@@ -126,7 +126,7 @@ def _price_distribution(fdf: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_L(title="Price Distribution (paid titles ≤ $80)"),
         xaxis=dict(title="Price (USD)", showgrid=False),
-        yaxis=dict(title="Game Count", showgrid=True, gridcolor="#1e2030"),
+        yaxis=dict(title="Game Count", showgrid=True, gridcolor="#151525"),
         showlegend=False,
     )
     return fig
@@ -238,26 +238,26 @@ def _price_vs_quality(
             title="Price (USD) — Log₁₀ Scale (equal visual spacing for $1, $5, $10, $20, $60)",
             type="log",
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
     elif scale_mode == "Focused ($0–$70 Linear)":
         x_cfg = dict(
             title="Price (USD) — Focused View ($0–$70 covers 99.7% of games, eliminating $100+ software outlier distortion)",
             range=[0, 70],
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
     else:  # Full catalog
         x_cfg = dict(
             title="Price (USD) — Full Range (Includes extreme $100+ package outliers)",
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
 
     fig.update_layout(
         **_L(title="Price vs Review Quality (Point Opacity = 0.22)", margin=dict(t=52, r=16, b=50, l=60)),
         xaxis=x_cfg,
-        yaxis=dict(title="Review Score (%)", range=[0, 102], showgrid=True, gridcolor="#1e2030"),
+        yaxis=dict(title="Review Score (%)", range=[0, 102], showgrid=True, gridcolor="#151525"),
         legend=dict(orientation="h", y=1.07, x=0, font=dict(size=10)),
     )
     return fig
@@ -307,7 +307,7 @@ def _ownership_bubble(
             tickvals=[1, 2, 3, 4, 5, 6],
             ticktext=["10", "100", "1K", "10K", "100K", "1M+"],
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
     else:
         # Estimated owners with gentle density jitter (+- 0.06 in log10 space) to reveal mass/distribution
@@ -319,7 +319,7 @@ def _ownership_bubble(
             tickvals=[4.0, 4.544, 4.875, 5.176, 5.544, 5.875, 6.176, 6.544, 6.875, 7.176, 7.875, 8.176],
             ticktext=["10K", "35K", "75K", "150K", "350K", "750K", "1.5M", "3.5M", "7.5M", "15M", "75M", "150M"],
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
 
     # Color grouping to prevent visual overload
@@ -388,20 +388,20 @@ def _ownership_bubble(
             title="Price (USD) — Log₁₀ Scale",
             type="log",
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
     elif scale_mode == "Focused ($0–$70 Linear)":
         x_cfg = dict(
             title="Price (USD) — Focused View ($0–$70 covers 99.7% of catalog)",
             range=[0, 70],
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
     else:
         x_cfg = dict(
             title="Price (USD) — Full Range",
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
 
     fig.update_layout(
@@ -498,7 +498,7 @@ def _genre_value_ranking(
     ))
     fig.update_layout(
         **_L(title=chart_title, margin=dict(t=52, r=50, b=40, l=110)),
-        xaxis=dict(title=x_title, showgrid=True, gridcolor="#1e2030"),
+        xaxis=dict(title=x_title, showgrid=True, gridcolor="#151525"),
         yaxis=dict(title="", showgrid=False),
         height=max(360, len(g) * 32 + 80),
     )
@@ -569,7 +569,7 @@ def _release_timeline(
             ))
         y_title = "Share of Top Genres (%)"
         chart_title = "Genre Market Share Composition (Top 8 Genres, 100% Normalized Area, 2010+)"
-        y_axis_cfg = dict(title=y_title, range=[0, 100], ticksuffix="%", showgrid=True, gridcolor="#1e2030")
+        y_axis_cfg = dict(title=y_title, range=[0, 100], ticksuffix="%", showgrid=True, gridcolor="#151525")
 
     elif view_mode == "Stacked Area (Total Volume)":
         for i, g in enumerate(top_genres):
@@ -584,7 +584,7 @@ def _release_timeline(
             ))
         y_title = "Games Released (Stacked)"
         chart_title = "Cumulative Genre Release Volume (Stacked Area, 2010+)"
-        y_axis_cfg = dict(title=y_title, showgrid=True, gridcolor="#1e2030")
+        y_axis_cfg = dict(title=y_title, showgrid=True, gridcolor="#151525")
 
     else:  # Annual Volume (Multi-Line) — Default
         is_log = (y_scale == "Log Scale (log₁₀)")
@@ -604,7 +604,7 @@ def _release_timeline(
             title=y_title,
             type="log" if is_log else "linear",
             showgrid=True,
-            gridcolor="#1e2030",
+            gridcolor="#151525",
         )
 
     if include_2026 and max_yr >= 2026:

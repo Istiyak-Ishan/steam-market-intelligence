@@ -24,7 +24,7 @@ def _layout(**kw) -> dict:
         template="plotly_dark",
         plot_bgcolor=PLOTLY_BG_COLOR,
         paper_bgcolor=PLOTLY_PAPER_BG,
-        font=dict(color=PLOTLY_FONT_COLOR, family="Inter, sans-serif", size=12),
+        font=dict(color=PLOTLY_FONT_COLOR, family="IBM Plex Sans, sans-serif", size=12),
         margin=dict(t=50, r=16, b=50, l=60),
     )
     base.update(kw)
@@ -51,17 +51,19 @@ def _signal_card(
     interpretation: str,
     explore_page: str,
 ) -> str:
-    color_map = {"up": "#10b981", "down": "#f43f5e", "neutral": "#f59e0b"}
-    arrow_map  = {"up": "↑", "down": "↓", "neutral": "→"}
-    col   = color_map[direction]
-    arrow = arrow_map[direction]
+    color_map  = {"up": "var(--success)", "down": "var(--danger)", "neutral": "var(--warning)"}
+    border_map = {"up": "var(--success)", "down": "var(--danger)", "neutral": "var(--border-subtle)"}
+    arrow_map  = {"up": "\u2191", "down": "\u2193", "neutral": "\u2192"}
+    col        = color_map[direction]
+    top_border = border_map[direction]
+    arrow      = arrow_map[direction]
     return (
-        f'<div class="signal-card">'
-        f'<div class="signal-title">{title}</div>'
-        f'<div class="signal-value">{value}</div>'
-        f'<div class="signal-delta" style="color:{col};">{arrow} {delta}</div>'
-        f'<div class="signal-interp">{interpretation}</div>'
-        f'<div class="signal-explore">→ {explore_page}</div>'
+        f'<div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-top:2px solid {top_border}; padding:18px 20px;">'
+        f'<div style="font-size:0.68rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; font-family:\'IBM Plex Sans\',sans-serif;">{title}</div>'
+        f'<div style="font-family:\'JetBrains Mono\',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); margin-bottom:4px;">{value}</div>'
+        f'<div style="font-size:0.8rem; font-weight:500; color:{col}; margin-bottom:10px; font-family:\'IBM Plex Sans\',sans-serif;">{arrow} {delta}</div>'
+        f'<div style="font-size:0.82rem; color:var(--text-secondary); line-height:1.55; margin-bottom:10px; font-family:\'IBM Plex Sans\',sans-serif;">{interpretation}</div>'
+        f'<div style="font-size:0.72rem; color:var(--accent); font-weight:500; font-family:\'IBM Plex Sans\',sans-serif;">{explore_page}</div>'
         f'</div>'
     )
 
@@ -70,172 +72,7 @@ def _signal_card(
 
 def render(df: pd.DataFrame) -> None:
 
-    # Extra CSS scoped to overview
-    st.markdown("""
-    <style>
-    .overview-hero {
-        background: linear-gradient(135deg,
-            rgba(124,106,247,0.09) 0%,
-            rgba(79,142,247,0.05) 40%,
-            rgba(9,9,15,0) 100%);
-        border: 1px solid #252740;
-        border-radius: 16px;
-        padding: 36px 40px 30px;
-        margin-bottom: 28px;
-        position: relative;
-        overflow: hidden;
-    }
-    .overview-hero::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent 0%, #7c6af7 30%, #4f8ef7 60%, transparent 100%);
-        opacity: 0.7;
-    }
-    .overview-platform {
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.16em;
-        color: #7c6af7;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-    }
-    .overview-title {
-        font-size: 2.6rem;
-        font-weight: 800;
-        letter-spacing: -0.035em;
-        line-height: 1.1;
-        background: linear-gradient(135deg, #e8e9f3 0%, #a78bfa 60%, #4f8ef7 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 14px;
-    }
-    .overview-subtitle {
-        font-size: 1.0rem;
-        color: #8b8fa8;
-        line-height: 1.7;
-        max-width: 680px;
-        font-weight: 400;
-    }
-    .overview-badge {
-        display: inline-block;
-        background: rgba(124,106,247,0.12);
-        border: 1px solid rgba(124,106,247,0.25);
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 0.72rem;
-        color: #a78bfa;
-        font-weight: 600;
-        margin-top: 16px;
-        letter-spacing: 0.04em;
-    }
-    /* KPI strip */
-    .kpi-strip {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 12px;
-        margin-bottom: 28px;
-    }
-    .kpi-item {
-        background: #14151f;
-        border: 1px solid #1e2030;
-        border-radius: 10px;
-        padding: 16px 18px;
-        transition: border-color 0.18s ease;
-    }
-    .kpi-item:hover { border-color: #333560; }
-    .kpi-val {
-        font-size: 1.65rem;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        color: #e8e9f3;
-        line-height: 1.15;
-    }
-    .kpi-lbl {
-        font-size: 0.7rem;
-        color: #555876;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-top: 4px;
-        font-weight: 500;
-    }
-    /* Signals */
-    .signals-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-        margin-bottom: 28px;
-    }
-    .signal-card {
-        background: #14151f;
-        border: 1px solid #1e2030;
-        border-radius: 12px;
-        padding: 20px 22px;
-        transition: border-color 0.18s ease, transform 0.12s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    .signal-card:hover {
-        border-color: #252740;
-        transform: translateY(-2px);
-    }
-    .signal-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(124,106,247,0.4), transparent);
-    }
-    .signal-title {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: #555876;
-        text-transform: uppercase;
-        letter-spacing: 0.09em;
-        margin-bottom: 8px;
-    }
-    .signal-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #e8e9f3;
-        letter-spacing: -0.025em;
-        margin-bottom: 6px;
-    }
-    .signal-delta {
-        font-size: 0.82rem;
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-    .signal-interp {
-        font-size: 0.815rem;
-        color: #8b8fa8;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-    .signal-explore {
-        font-size: 0.72rem;
-        color: #7c6af7;
-        font-weight: 500;
-        letter-spacing: 0.03em;
-    }
-    .chart-section {
-        background: #14151f;
-        border: 1px solid #1e2030;
-        border-radius: 12px;
-        padding: 20px 22px;
-        margin-bottom: 16px;
-    }
-    .chart-section-title {
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #e8e9f3;
-        letter-spacing: -0.01em;
-        border-left: 2px solid #7c6af7;
-        padding-left: 10px;
-        margin-bottom: 14px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
 
     # ── Compute live stats ─────────────────────────────────────────────────────
     stats   = dataset_summary(df)
@@ -274,18 +111,16 @@ def render(df: pd.DataFrame) -> None:
     # 7. Median ownership across all games
     med_own = df["owners_mid"].median()
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
+    # ── Page Header ────────────────────────────────────────────────────────────
     st.markdown(f"""
-    <div class="overview-hero">
-        <div class="overview-platform">Steam Market Intelligence Platform</div>
-        <div class="overview-title">STEAM MARKET<br>INTELLIGENCE</div>
-        <div class="overview-subtitle">
+    <div class="hero-header">
+        <div class="hero-title">Steam Market Intelligence</div>
+        <div class="hero-subtitle">
             A quantitative analytical system covering pricing dynamics, review quality,
             player reach, engagement depth, and market positioning across
-            <strong style="color:#e8e9f3;">{stats['total_games']:,} verified Steam titles</strong>
-            spanning {yr[0]}–{yr[1]} ({yr_span} years inclusive). Every figure computed live from source data.
+            <strong style="color:var(--text-primary);">{stats['total_games']:,} verified Steam titles</strong>
+            spanning {yr[0]}–{yr[1]} ({yr_span} years). Every figure computed live from source data.
         </div>
-        <div class="overview-badge">{stats['total_games']:,} titles · {stats['unique_genres']} genres · {yr_span} years ({yr[0]}–{yr[1]})</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -293,36 +128,36 @@ def render(df: pd.DataFrame) -> None:
     med_owners_fmt = _fmt_number(med_own)
 
     st.markdown(f"""
-    <div class="kpi-strip">
-        <div class="kpi-item">
-            <div class="kpi-val">{stats['total_games']:,}</div>
-            <div class="kpi-lbl">Total Games</div>
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:24px;">
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">{stats['total_games']:,}</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">Total Games</div>
         </div>
-        <div class="kpi-item">
-            <div class="kpi-val">{yr[0]}–{yr[1]}</div>
-            <div class="kpi-lbl">{yr_span}-Year History</div>
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">{yr[0]}–{yr[1]}</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">{yr_span}-Year Span</div>
         </div>
-        <div class="kpi-item">
-            <div class="kpi-val">{stats['unique_genres']}</div>
-            <div class="kpi-lbl">Genres</div>
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">{stats['unique_genres']}</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">Genres</div>
         </div>
-        <div class="kpi-item">
-            <div class="kpi-val">${stats['median_price']:.2f}</div>
-            <div class="kpi-lbl">Median Price</div>
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">${stats['median_price']:.2f}</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">Median Price</div>
         </div>
-        <div class="kpi-item">
-            <div class="kpi-val">{stats['median_review_pct']:.1f}%</div>
-            <div class="kpi-lbl">Median Review</div>
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">{stats['median_review_pct']:.1f}%</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">Median Review</div>
         </div>
-        <div class="kpi-item">
-            <div class="kpi-val">{med_owners_fmt}</div>
-            <div class="kpi-lbl">Median Ownership</div>
+        <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); padding:14px 16px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--accent); text-shadow:0 0 8px rgba(0,245,255,0.4); letter-spacing:-0.02em;">{med_owners_fmt}</div>
+            <div style="font-size:0.68rem; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.09em; margin-top:5px;">Median Ownership</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # ── Key Findings — computed from live data ────────────────────────────────
-    st.subheader("Key Findings")
+    st.markdown('<div class="section-header">Key Findings</div>', unsafe_allow_html=True)
 
     # Compute real numbers for bullets
     action_med  = paid[paid["primary_genre"] == "Action"]["price"].median() if "primary_genre" in paid.columns else 0
@@ -339,15 +174,6 @@ def render(df: pd.DataFrame) -> None:
 - 📊 The top **1%** of games hold **{top_1pct_share:.0f}% of all estimated ownership** — Steam follows an extreme Pareto distribution requiring viral-level breakout to reach mass market.
     """)
 
-    kf_col1, kf_col2, kf_col3 = st.columns(3)
-    kf_col1.metric("Games Analyzed", f"{stats['total_games']:,}")
-    kf_col2.metric(
-        "Avg Value Score (paid)",
-        f"{paid['review_score_pct'].mean() * 100 / max(0.01, paid['price'].mean()):.2f} pts/$",
-    )
-    kf_col3.metric("Top Genre by Count", top_genre)
-
-    st.markdown("---")
 
     # ── Market Signals ────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">Market Signals</div>', unsafe_allow_html=True)
@@ -434,7 +260,7 @@ def render(df: pd.DataFrame) -> None:
         ),
     ]
 
-    signals_html = '<div class="signals-grid">' + "".join(signals) + '</div>'
+    signals_html = '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:28px;">' + "".join(signals) + '</div>'
     st.markdown(signals_html, unsafe_allow_html=True)
 
     # ── Charts: 3-column layout ────────────────────────────────────────────────
@@ -453,14 +279,14 @@ def render(df: pd.DataFrame) -> None:
             mode="lines",
             fill="tozeroy",
             line=dict(color=ACCENT_COLORS[0], width=2),
-            fillcolor="rgba(124,106,247,0.12)",
+            fillcolor="rgba(79,142,247,0.08)",
             name="Releases",
             hovertemplate="<b>%{x}</b><br>%{y:,} games<extra></extra>",
         ))
         fig.update_layout(
             **_layout(title="Annual Steam Releases", showlegend=False),
             xaxis=dict(title="Year", showgrid=False),
-            yaxis=dict(title="Games Released", showgrid=True, gridcolor="#1e2030"),
+            yaxis=dict(title="Games Released", showgrid=True, gridcolor="#151525"),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -472,7 +298,7 @@ def render(df: pd.DataFrame) -> None:
             labels=tier_df["price_tier"],
             values=tier_df["count"],
             hole=0.58,
-            marker=dict(colors=tier_colors, line=dict(width=1, color="#09090f")),
+            marker=dict(colors=tier_colors, line=dict(width=1, color="#0d0e11")),
             textinfo="label+percent",
             textfont=dict(size=11),
             hovertemplate="<b>%{label}</b><br>%{value:,} games (%{percent})<extra></extra>",
@@ -499,7 +325,7 @@ def render(df: pd.DataFrame) -> None:
         ))
         fig3.update_layout(
             **_layout(title="Genre Game Count (Top 10)", margin=dict(t=50, r=16, b=40, l=110)),
-            xaxis=dict(title="Games", showgrid=True, gridcolor="#1e2030"),
+            xaxis=dict(title="Games", showgrid=True, gridcolor="#151525"),
             yaxis=dict(title="", categoryorder="total ascending"),
         )
         st.plotly_chart(fig3, use_container_width=True)
@@ -529,7 +355,7 @@ def render(df: pd.DataFrame) -> None:
         fig4.update_layout(
             **_layout(title="Game Pricing Over Time (paid titles)"),
             xaxis=dict(title="Year", showgrid=False),
-            yaxis=dict(title="Price (USD)", showgrid=True, gridcolor="#1e2030"),
+            yaxis=dict(title="Price (USD)", showgrid=True, gridcolor="#151525"),
             legend=dict(orientation="h", y=1.08, x=0),
         )
         st.plotly_chart(fig4, use_container_width=True)
@@ -545,13 +371,13 @@ def render(df: pd.DataFrame) -> None:
             line=dict(color=ACCENT_COLORS[2], width=2.5),
             marker=dict(size=5),
             fill="tozeroy",
-            fillcolor="rgba(34,211,238,0.06)",
+            fillcolor="rgba(16,185,129,0.06)",
             hovertemplate="<b>%{x}</b><br>%{y:.1f}%<extra></extra>",
         ))
         fig5.update_layout(
             **_layout(title="Median Review Quality Over Time"),
             xaxis=dict(title="Year", showgrid=False),
-            yaxis=dict(title="Review Score (%)", range=[0, 100], showgrid=True, gridcolor="#1e2030"),
+            yaxis=dict(title="Review Score (%)", range=[0, 100], showgrid=True, gridcolor="#151525"),
             showlegend=False,
         )
         st.plotly_chart(fig5, use_container_width=True)
@@ -578,14 +404,14 @@ def render(df: pd.DataFrame) -> None:
     )
     fig6.update_traces(
         textposition="top center",
-        textfont=dict(size=10, color="#8b8fa8"),
+        textfont=dict(size=10, color="#555e6e"),
         marker=dict(line=dict(width=1, color="rgba(255,255,255,0.15)")),
     )
     fig6.update_coloraxes(colorbar=dict(title="Avg Owners", len=0.7))
     fig6.update_layout(
         **_layout(title="", margin=dict(t=20, r=30, b=60, l=70)),
         height=480,
-        xaxis=dict(title="Mean Price (USD)", showgrid=True, gridcolor="#1e2030"),
-        yaxis=dict(title="Mean Review Score (%)", showgrid=True, gridcolor="#1e2030"),
+        xaxis=dict(title="Mean Price (USD)", showgrid=True, gridcolor="#151525"),
+        yaxis=dict(title="Mean Review Score (%)", showgrid=True, gridcolor="#151525"),
     )
     st.plotly_chart(fig6, use_container_width=True)

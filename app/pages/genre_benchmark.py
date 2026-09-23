@@ -25,7 +25,7 @@ def render(df):
     fig_gaps.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", 
         plot_bgcolor="rgba(0,0,0,0)", 
-        font=dict(color="#00F0FF", family="Rajdhani")
+        font=dict(color="#9da3ae", family="IBM Plex Sans")
     )
     st.plotly_chart(fig_gaps, use_container_width=True)
 
@@ -45,6 +45,6 @@ def render(df):
         fig_density.update_layout(
             paper_bgcolor="rgba(0,0,0,0)", 
             plot_bgcolor="rgba(0,0,0,0)", 
-            font=dict(color="#00F0FF", family="Rajdhani")
+            font=dict(color="#9da3ae", family="IBM Plex Sans")
         )
         st.plotly_chart(fig_density, use_container_width=True)

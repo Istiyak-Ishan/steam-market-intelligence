@@ -14,7 +14,7 @@ def render(df: pd.DataFrame) -> None:
     total_games = len(df)
     st.markdown(f"""
     <div class="hero-header">
-        <div class="hero-title">♟️ Strategic Playbook</div>
+        <div class="hero-title">Strategic Playbook</div>
         <div class="hero-subtitle">
             Synthesised, data-backed insights derived from {total_games:,} commercial Steam titles. 
             Segmented by audience to provide actionable intelligence.
@@ -23,7 +23,7 @@ def render(df: pd.DataFrame) -> None:
     """, unsafe_allow_html=True)
 
     tab_gamers, tab_indies, tab_pubs, tab_analysts = st.tabs([
-        "🎮 For Gamers", "🛠️ For Indie Developers", "🏢 For Publishers", "📈 For Analysts"
+        "For Gamers", "For Indie Developers", "For Publishers", "For Analysts"
     ])
 
     # ── TAB 1: GAMERS ──────────────────────────────────────────────────────────

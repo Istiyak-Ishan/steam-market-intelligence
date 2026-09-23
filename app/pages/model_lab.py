@@ -31,7 +31,7 @@ def render(df=None, models=None, **kwargs) -> None:
     hide_header = kwargs.get("hide_header", False)
     if not hide_header:
         st.markdown(
-            '<div class="hero-header"><div class="hero-title">🧪 Model Inspector</div>'
+            '<div class="hero-header"><div class="hero-title">Model Inspector</div>'
             '<div class="hero-subtitle">Evaluation metrics, feature importance, and classification diagnostics for all trained models.</div></div>',
             unsafe_allow_html=True,
         )

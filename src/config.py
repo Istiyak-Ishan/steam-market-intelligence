@@ -101,18 +101,17 @@ SEGMENTATION_K_DEFAULT = 5             # fallback default
 
 # ── Plotly theme ──────────────────────────────────────────────────────────────
 PLOTLY_TEMPLATE  = "plotly_dark"
-PLOTLY_BG_COLOR  = "rgba(0,0,0,0)"   # Transparent for HUD blending
-PLOTLY_PAPER_BG  = "rgba(0,0,0,0)"   # Transparent for HUD blending
-PLOTLY_FONT_COLOR = "#00F0FF"        # Electric Blue text for tactical feel
+PLOTLY_BG_COLOR  = "rgba(0,0,0,0)"
+PLOTLY_PAPER_BG  = "rgba(0,0,0,0)"
+PLOTLY_FONT_COLOR = "#6b7a99"  # Muted blue-grey
 ACCENT_COLORS    = [
-    "#FF4500",  # Tactical Orange (primary)
-    "#00F0FF",  # Electric Blue
-    "#39FF14",  # Neon Green
-    "#FF003C",  # Crimson
-    "#F59E0B",  # Amber
-    "#8B5CF6",  # Violet (retained for specific needs)
-    "#E2E8F0",  # Silver
-    "#10B981",  # Emerald
+    "#00f5ff",  # Electric Cyan (primary)
+    "#ff0066",  # Hot Magenta (secondary)
+    "#00ff88",  # Neon Green
+    "#f0ff00",  # Acid Yellow
+    "#8b5cf6",  # Purple
+    "#e2e8f0",  # Silver
+    "#fb923c",  # Orange
 ]
 
 # ── Market-position percentile thresholds ────────────────────────────────────

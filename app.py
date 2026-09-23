@@ -32,35 +32,45 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 html, body, [class*="css"], .stMarkdown, .stText, p {
-    font-family: 'Rajdhani', sans-serif !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
     -webkit-font-smoothing: antialiased;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
 }
 
 /* ── Color Tokens ──────────────────────────────────────── */
 :root {
-    --bg-base:        #040508;
-    --bg-surface:     #080a0f;
-    --bg-elevated:    rgba(10, 14, 23, 0.75);
-    --bg-overlay:     rgba(0, 240, 255, 0.05);
-    --border-subtle:  #152033;
-    --border-default: #1e3a5f;
-    --border-strong:  #00F0FF;
-    --text-primary:   #00F0FF;
-    --text-secondary: #7bb5cf;
-    --text-muted:     #4a7b93;
-    --accent-violet:  #FF4500;
-    --accent-blue:    #00F0FF;
+    /* Backgrounds & Surfaces */
+    --bg-base:        #05050a;  /* Deep blue-black */
+    --bg-surface:     #0f0f1a;  /* Slightly lighter cool-dark */
+    --bg-elevated:    #151525;  
+    
+    /* Borders & Lines */
+    --border-subtle:  rgba(0, 245, 255, 0.15); /* 15% Cyan */
+    --border-default: rgba(0, 245, 255, 0.25); /* 25% Cyan */
+    --border-active:  rgba(0, 245, 255, 0.5);  /* 50% Cyan */
+    
+    /* Typography */
+    --text-primary:   #ffffff;  /* Bright white for titles */
+    --text-secondary: #6b7a99;  /* Muted blue-grey */
+    --text-muted:     #4a5568;
+    
+    /* Accents (Strict Hierarchy) */
+    --accent:         #00f5ff;  /* Primary: Electric Cyan */
+    --accent-secondary:#ff0066; /* Secondary: Hot Magenta */
+    --success:        #00ff88;  /* Neon Green */
+    --warning:        #f0ff00;  /* Acid Yellow */
+    --danger:         #ff0066;  /* Hot Magenta */
 }
 
 /* ── App Background ────────────────────────────────────── */
 .stApp {
     background-color: var(--bg-base);
     background-image: 
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    color: var(--text-primary);
+        linear-gradient(rgba(0, 245, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: center center;
+    color: var(--text-secondary);
 }
 
 /* Hide default Streamlit elements except the header (which contains the sidebar toggle) */
@@ -70,194 +80,200 @@ footer {visibility: hidden;}
 /* ── Sidebar ────────────────────────────────────────────── */
 section[data-testid="stSidebar"] {
     background: var(--bg-surface);
-    border-right: 1px solid var(--border-default);
-    box-shadow: inset -5px 0 20px rgba(0, 240, 255, 0.03);
+    border-right: 1px solid var(--border-subtle);
 }
 
-/* ── Hero Header ─────────────────────────────────────────── */
+/* ── Page Header ─────────────────────────────────────── */
 .hero-header {
-    background: rgba(0, 240, 255, 0.03);
-    border: 1px solid var(--accent-blue);
-    border-radius: 0px;
-    padding: 24px 30px 20px;
+    padding: 24px 0 16px;
     margin-bottom: 24px;
-    position: relative;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(0, 240, 255, 0.05);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-}
-.hero-header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 2px;
-    background: var(--accent-blue);
-    box-shadow: 0 0 15px var(--accent-blue);
+    border-bottom: 1px solid var(--border-subtle);
 }
 .hero-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--accent-blue);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.05em;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    line-height: 1.2;
 }
 .hero-subtitle {
-    font-family: 'Rajdhani', sans-serif;
-    color: var(--text-secondary);
-    font-size: 1.15rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-top: 5px;
+    line-height: 1.5;
 }
 
 /* ── Metric Cards ────────────────────────────────────────── */
 .metric-card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    border-radius: 0px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     padding: 16px 20px;
-    margin-bottom: 10px;
-    position: relative;
-    border-left: 3px solid var(--accent-violet);
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
 }
 .metric-value {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.8rem;
-    color: var(--accent-violet);
-    text-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.55rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); /* Restrained glow */
+    line-height: 1.2;
 }
 .metric-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 8px;
+    letter-spacing: 0.09em;
+    margin-top: 6px;
 }
 
-/* ── Section Headers ─────────────────────────────────────── */
+/* ── Section Dividers ────────────────────────────────────── */
 .section-header {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    color: var(--accent-blue);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    border-bottom: 1px solid var(--border-default);
-    padding-bottom: 5px;
-    margin: 25px 0 15px 0;
-    text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    letter-spacing: 0.11em;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 6px;
+    margin: 28px 0 14px 0;
 }
 
 /* ── Info Boxes ──────────────────────────────────────────── */
 .info-box {
-    background: rgba(255, 69, 0, 0.05);
-    border: 1px solid var(--accent-violet);
-    border-radius: 0px;
-    padding: 12px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--accent-violet);
-    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    background: rgba(79, 142, 247, 0.06);
+    border-left: 2px solid var(--accent);
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
 }
 
 /* ── Streamlit metric widget ─────────────────────────────── */
 div[data-testid="stMetric"] {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    border-radius: 0px;
-    border-top: 2px solid var(--accent-blue);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-top: 2px solid var(--border-default);
     padding: 14px 16px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
 }
 div[data-testid="stMetricValue"] {
-    font-family: 'Orbitron', sans-serif !important;
-    color: var(--accent-blue) !important;
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 1.35rem !important;
+    color: var(--accent) !important;
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
 }
 div[data-testid="stMetric"] label {
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 0.7rem !important;
     color: var(--text-muted) !important;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
 }
 
 /* ── Plotly chart container ──────────────────────────────── */
 div[data-testid="stPlotlyChart"] {
-    border: 1px solid var(--border-default);
-    border-radius: 0px;
-    background: var(--bg-elevated);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.03);
+    background: transparent;
 }
 
-/* ── Expanders \u0026 Tabs ───────────────────────────────────────────── */
+/* ── Expanders & Tabs ────────────────────────────────────── */
 div[data-testid="stExpander"] {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default) !important;
-    border-radius: 0px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle) !important;
 }
 div[data-baseweb="tab-list"] {
-    background: var(--bg-elevated);
-    border-radius: 0px;
-    border: 1px solid var(--border-default);
-    border-bottom: 2px solid var(--accent-blue);
+    background: transparent;
+    border-bottom: 1px solid var(--border-subtle);
+    gap: 2px;
 }
 button[data-baseweb="tab"] {
-    font-family: 'Orbitron', sans-serif;
-    text-transform: uppercase;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
     color: var(--text-muted);
+    background: transparent;
+    border-bottom: 2px solid transparent !important;
+    padding: 8px 14px;
+    text-transform: none;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    background: rgba(0, 240, 255, 0.1) !important;
-    color: var(--accent-blue) !important;
-    text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    border-bottom: 2px solid var(--accent) !important;
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 .stButton > button {
     background: transparent;
-    color: var(--accent-blue);
-    border: 1px solid var(--accent-blue);
-    border-radius: 0px;
-    font-family: 'Orbitron', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: all 150ms linear;
 }
 .stButton > button:hover {
-    background: rgba(0, 240, 255, 0.15);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
-    color: #fff;
-    border-color: #fff;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(0, 245, 255, 0.3);
+}
+.stButton > button:active {
+    background: rgba(0, 245, 255, 0.1);
 }
 
 /* ── Select boxes and inputs ─────────────────────────────── */
 div[data-baseweb="select"] > div, input {
     background: var(--bg-surface) !important;
     border: 1px solid var(--border-default) !important;
-    border-radius: 0px !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    color: var(--text-primary) !important;
+    border-radius: 4px !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
 }
 
-/* ── Sidebar Nav ───────────────────────────────────── */
-.nav-section {
-    font-family: 'Orbitron', sans-serif;
-    color: var(--accent-violet);
-    text-shadow: 0 0 5px rgba(255, 69, 0, 0.3);
-}
+/* ── Sidebar Navigation ──────────────────────────────────── */
 .nav-brand-title {
-    font-family: 'Orbitron', sans-serif;
-    color: var(--accent-blue);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.nav-section {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.63rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    padding: 12px 0 5px;
 }
 div[data-testid="stRadio"] > div > label {
-    font-family: 'Rajdhani', sans-serif;
-    text-transform: uppercase;
-    border-radius: 0px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 5px 8px;
+    transition: all 150ms linear;
 }
 div[data-testid="stRadio"] > div > label:hover {
-    background: rgba(0, 240, 255, 0.1);
-    color: var(--accent-blue);
-    border-left: 2px solid var(--accent-blue);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-subtle);
+}
+div[data-testid="stRadio"] > div > label[data-baseweb="radio"] input:checked + div {
+    /* For selected radio background if possible, Streamlit is tricky here 
+       but we rely on hover and active states */
 }
 
 /* ── Dataframes ───────────────────────────────────── */
@@ -305,25 +321,25 @@ def get_models():
 
 NAV_GROUPS = [
     ("", [
-        ("🏠  Overview",               "overview"),
-        ("📊  Market Insights",         "market_explorer"),
-        ("📈  Genre Benchmark",         "genre_benchmark"),
-        ("👽  Anomaly Finder",          "anomaly_finder"),
+        ("Overview",               "overview"),
+        ("Market Insights",        "market_explorer"),
+        ("Genre Benchmark",        "genre_benchmark"),
+        ("Anomaly Finder",         "anomaly_finder"),
     ]),
-    ("ML TOOLS", [
-        ("🔮  Predict Tool",           "predict_tool"),
-        ("🔍  Feature Importance",      "model_lab"),
-        ("🗂️  Cluster Explorer",       "segmentation"),
+    ("ML Tools", [
+        ("Predict Tool",           "predict_tool"),
+        ("Feature Importance",     "model_lab"),
+        ("Cluster Explorer",       "segmentation"),
     ]),
-    ("GAME INTELLIGENCE", [
-        ("🎮  Game Analyzer",           "game_analyzer"),
-        ("🚀  Publisher Studio",        "publisher_studio"),
-        ("♟️  Strategic Playbook",      "strategic_playbook"),
-        ("⚔️  Game Comparison",         "game_comparison"),
-        ("🎯  Similar Games",           "similar_games"),
+    ("Game Intelligence", [
+        ("Game Analyzer",          "game_analyzer"),
+        ("Publisher Studio",       "publisher_studio"),
+        ("Strategic Playbook",     "strategic_playbook"),
+        ("Game Comparison",        "game_comparison"),
+        ("Similar Games",          "similar_games"),
     ]),
     ("", [
-        ("📖  EDA",                    "methodology"),
+        ("EDA Notebook",           "methodology"),
     ]),
 ]
 
@@ -339,16 +355,9 @@ PAGE_KEYS   = {label: key for label, key in PAGES_FLAT}
 with st.sidebar:
     # Brand
     st.markdown("""
-    <div class="nav-brand">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-            <div style="width:32px;height:32px;background:linear-gradient(135deg,#7c6af7,#4f8ef7);
-                        border-radius:8px;display:flex;align-items:center;justify-content:center;
-                        font-size:16px;">🎮</div>
-            <div>
-                <div class="nav-brand-title">Steam Market Intelligence</div>
-                <div class="nav-brand-sub">Data Analytics Platform</div>
-            </div>
-        </div>
+    <div style="padding:20px 4px 16px; border-bottom:1px solid #22252e; margin-bottom:8px;">
+        <div class="nav-brand-title">Steam Market Intelligence</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:0.7rem; color:#555e6e; margin-top:3px; text-transform:uppercase; letter-spacing:0.08em;">Data Analytics Platform</div>
     </div>
     """, unsafe_allow_html=True)
 

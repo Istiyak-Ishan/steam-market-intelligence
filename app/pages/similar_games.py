@@ -67,13 +67,13 @@ def _render_comparison_radar(target: dict, comps: list, medians: pd.Series):
 
     fig.update_layout(
         polar=dict(
-            radialaxis=dict(visible=True, range=[0, 2.5], tickfont=dict(color="#4a7b93")),
-            angularaxis=dict(tickfont=dict(color="#00F0FF"))
+            radialaxis=dict(visible=True, range=[0, 2.5], tickfont=dict(color="#555e6e")),
+            angularaxis=dict(tickfont=dict(color="#9da3ae"))
         ),
         showlegend=True,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Rajdhani", color="#00F0FF")
+        font=dict(family="IBM Plex Sans", color="#9da3ae")
     )
     return fig
 

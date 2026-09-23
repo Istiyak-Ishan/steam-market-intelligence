@@ -88,7 +88,7 @@ def render(df):
             fig.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Rajdhani", color="#00F0FF")
+                font=dict(family="IBM Plex Sans", color="#9da3ae")
             )
             st.plotly_chart(fig, use_container_width=True)
             
