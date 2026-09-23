@@ -70,9 +70,18 @@ def render(df, models=None):
     else:
         default_titles = [t for t in PRESET_SHOWDOWNS[showdown_name] if t in df["name"].values]
         
+    search_q = st.text_input("Search for specific games to add to the dropdown below:", "")
+    
+    popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(2000).tolist()
+    options_set = set(popular_games + default_titles)
+    
+    if search_q and len(search_q) >= 2:
+        matches = df[df["name"].str.contains(search_q, case=False, na=False)]["name"].tolist()
+        options_set.update(matches[:100])
+        
     titles = st.multiselect(
         "Select Games to Compare (max 5)", 
-        options=df["name"].dropna().unique(), 
+        options=sorted(list(options_set)), 
         default=default_titles,
         max_selections=5
     )
