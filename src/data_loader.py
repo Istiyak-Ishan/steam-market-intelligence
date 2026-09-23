@@ -146,7 +146,7 @@ def _load_raw() -> pd.DataFrame:
     return df
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_resource(show_spinner=False)
 def load_data() -> pd.DataFrame:
     """Return the cleaned dataset.  Cached by Streamlit."""
     return _load_raw()

@@ -30,8 +30,8 @@ def _make_pca_scatter(seg_df: pd.DataFrame) -> go.Figure:
     if plot_df.empty:
         return go.Figure()
         
-    if len(plot_df) > 5000:
-        plot_df = plot_df.sample(5000, random_state=42)
+    if len(plot_df) > 2000:
+        plot_df = plot_df.sample(2000, random_state=42)
         
     X = plot_df[feat_cols]
     X_scaled = StandardScaler().fit_transform(X)
@@ -142,7 +142,7 @@ def _make_scatter(seg_df: pd.DataFrame, x: str, y: str, color_col: str = "cluste
     """Scatter plot coloured by cluster."""
     plot_df = seg_df[[x, y, color_col, "name"]].dropna()
     fig = px.scatter(
-        plot_df.sample(min(5000, len(plot_df)), random_state=42),
+        plot_df.sample(min(2000, len(plot_df)), random_state=42),
         x=x, y=y,
         color=color_col,
         opacity=0.5,

@@ -136,7 +136,7 @@ def _price_vs_quality(
     fdf: pd.DataFrame,
     scale_mode: str = "Focused ($0–$70 Linear)",
     show_trend: bool = True,
-    sample: int = 4000,
+    sample: int = 2000,
 ) -> go.Figure:
     """
     Price vs review quality scatter plot with overplotting mitigation,
@@ -268,7 +268,7 @@ def _ownership_bubble(
     scale_mode: str = "Focused ($0–$70 Linear)",
     color_by: str = "Top Genres (Clean Palette)",
     y_metric: str = "Estimated Owners (with Jitter)",
-    sample: int = 3500,
+    sample: int = 2000,
 ) -> go.Figure:
     """
     Price × Ownership bubble chart addressing:
