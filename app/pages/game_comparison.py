@@ -71,16 +71,10 @@ def render(df, models=None):
             st.session_state.compare_titles = []
         else:
             st.session_state.compare_titles = [t for t in PRESET_SHOWDOWNS[showdown_name] if t in df["name"].values]
-            
-    search_q = st.text_input("Search for specific games to add to the dropdown below:", "")
-    
-    popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(2000).tolist()
+    # Use top 10000 popular games to prevent browser freeze while allowing native search
+    popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(10000).tolist()
     options_set = set(popular_games + st.session_state.compare_titles)
-    
-    if search_q and len(search_q) >= 2:
-        matches = df[df["name"].str.contains(search_q, case=False, na=False)]["name"].unique().tolist()
-        options_set.update(matches[:100])
-        
+
     def update_titles():
         st.session_state.compare_titles = st.session_state._compare_titles_widget
         

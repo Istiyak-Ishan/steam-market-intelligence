@@ -58,22 +58,15 @@ def render(df: pd.DataFrame, models: dict) -> None:
 
     # ── Mode A: Search existing game ────────────────────────────────────────────
     if mode == "Search existing game":
-        search_query = st.text_input("Search game by name", placeholder="e.g. Hollow Knight, Stardew Valley…")
+        popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(15000).tolist()
+        game_name = st.selectbox("Search game name (Top 15k most reviewed)", options=popular_games, index=None, placeholder="e.g. Hollow Knight, Stardew Valley…")
         game_row = None
 
-        if search_query:
-            matches = df[df["name"].str.contains(search_query, case=False, na=False)]
-            if matches.empty:
-                st.warning("No games found matching that name.")
-            else:
-                if len(matches) > 100:
-                    st.info(f"Found {len(matches)} matches. Showing first 100. Refine search if needed.")
-                    matches = matches.head(100)
-                
-                game_name = st.selectbox("Select exact match", options=matches["name"].tolist())
-                if game_name:
-                    game_row = matches[matches["name"] == game_name].iloc[0]
-                    _render_game_profile(game_row, df)
+        if game_name:
+            matches = df[df["name"] == game_name]
+            if not matches.empty:
+                game_row = matches.iloc[0]
+                _render_game_profile(game_row, df)
 
     # ── Mode B: Custom profile ────────────────────────────────────────────────
     else:
