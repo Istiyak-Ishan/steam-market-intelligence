@@ -8,7 +8,7 @@ The platform provides a complete **Cyberpunk UI** aesthetic, engineered for high
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 ### 1. Market Insights
 - **Overview & Market Explorer:** Macro-level EDA of Steam's history. High-performance scatter/bubble charts capped dynamically to prevent browser freezing.
@@ -35,7 +35,7 @@ The platform provides a complete **Cyberpunk UI** aesthetic, engineered for high
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend & App Framework:** [Streamlit](https://streamlit.io/) + Vanilla CSS injected via `st.markdown`
 - **Data Visualizations:** [Plotly Express & Graph Objects](https://plotly.com/python/)
@@ -44,7 +44,7 @@ The platform provides a complete **Cyberpunk UI** aesthetic, engineered for high
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 steam-market-intelligence/
@@ -66,7 +66,7 @@ steam-market-intelligence/
 
 ---
 
-## ⚙️ Installation & Usage
+## Installation & Usage
 
 Clone the repository and navigate into the project directory:
 
@@ -107,7 +107,7 @@ streamlit run app.py
 
 ---
 
-## 🧠 Retraining the Models
+## Retraining the Models
 If you update `steam_games_cleaned.csv` with newer data, you must retrain the ML pipeline:
 ```bash
 python scripts/train_pipeline.py
@@ -116,6 +116,6 @@ This will automatically re-engineer features, train the 6 distinct models, and o
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Istiyak Hossain Ishan**
