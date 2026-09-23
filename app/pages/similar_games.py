@@ -4,15 +4,7 @@ import plotly.graph_objects as go
 from src.similarity import find_similar_games
 from src.config import ACCENT_COLORS
 
-POPULAR_TARGETS = [
-    "Cyberpunk 2077", 
-    "Stardew Valley", 
-    "Hades", 
-    "Elden Ring", 
-    "Terraria", 
-    "The Witcher 3: Wild Hunt",
-    "Portal 2"
-]
+
 
 def _render_comparison_radar(target: dict, comps: list, medians: pd.Series):
     fig = go.Figure()
@@ -80,22 +72,16 @@ def _render_comparison_radar(target: dict, comps: list, medians: pd.Series):
 def render(df):
     st.markdown("<div class='hero-header'><div class='hero-title'>Similar Games</div><div class='hero-subtitle'>Find Competitors & Inspiration</div></div>", unsafe_allow_html=True)
     
-    target_name = st.selectbox("Select or type a game", POPULAR_TARGETS + ["<Custom Search>"])
+    popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(15000).tolist()
+    target_name = st.selectbox(
+        "Search game name (Top 15k most reviewed)", 
+        options=popular_games, 
+        index=None, 
+        placeholder="e.g. Cyberpunk 2077, Stardew Valley…"
+    )
     
-    if target_name == "<Custom Search>":
-        search_q = st.text_input("Search game by name:")
-        if not search_q:
-            return
-        matches = df[df["name"].str.contains(search_q, case=False, na=False)]
-        if matches.empty:
-            st.warning("No matches found.")
-            return
-            
-        if len(matches) > 100:
-            st.info(f"Found {len(matches)} matches. Showing first 100.")
-            matches = matches.head(100)
-            
-        target_name = st.selectbox("Select exact match", matches["name"].unique().tolist())
+    if not target_name:
+        return
         
     target_row = df[df["name"] == target_name]
     if target_row.empty:
