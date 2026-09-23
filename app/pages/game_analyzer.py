@@ -171,15 +171,27 @@ def _render_model_results(model_profile: dict, game_values: dict, df: pd.DataFra
         pass
 
     # ── Executive Report Download ─────────────────────────────────────────────
+    owners = game_values.get('owners_mid')
+    if owners is None or pd.isna(owners): owners = 0
+    
+    peak = game_values.get('peak_ccu')
+    if peak is None or pd.isna(peak): peak = 0
+    
+    price = game_values.get('price')
+    if price is None or pd.isna(price): price = 0.0
+    
+    review = game_values.get('review_score_pct')
+    if review is None or pd.isna(review): review = 0.0
+
     st.markdown('<div class="section-header">Executive Summary</div>', unsafe_allow_html=True)
     report_md = f"""# Executive Report: {game_values.get('name', 'Unknown Game')}
 
 ## 1. Game Profile
 - **Primary Genre**: {game_values.get('primary_genre', 'Unknown')}
-- **Price**: ${game_values.get('price', 0.0):.2f}
-- **Review Score**: {(game_values.get('review_score_pct', 0) * 100):.1f}%
-- **Estimated Owners**: {game_values.get('owners_mid', 0):,}
-- **Peak CCU**: {game_values.get('peak_ccu', 0):,}
+- **Price**: ${price:.2f}
+- **Review Score**: {(review * 100):.1f}%
+- **Estimated Owners**: {int(owners):,}
+- **Peak CCU**: {int(peak):,}
 
 ## 2. ML Predictions
 - **Predicted Value Score**: {f"{val_pred:.2f} pts/$" if val_pred else 'N/A'}
@@ -284,19 +296,36 @@ All metrics are based on statistical associations from the Steam dataset. No cau
 
     # ── Anomaly Detection ─────────────────────────────────────────────────────
     st.markdown('<div class="section-header">Anomaly Detection</div>', unsafe_allow_html=True)
+    
+    # 1. AI Anomaly Detection (Isolation Forest)
+    try:
+        from app.pages.anomaly_finder import compute_isolation_forest_anomalies
+        iso_df = compute_isolation_forest_anomalies(df, contamination=0.02)
+        
+        if game_row is not None and "name" in game_row:
+            iso_match = iso_df[iso_df["name"] == game_row["name"]]
+            if not iso_match.empty:
+                score = iso_match.iloc[0]["anomaly_score"]
+                st.warning(f"🤖 **AI Anomaly Flag:** The Isolation Forest model classifies this game as a statistical market anomaly (Score: **{score:.2f}**). Its combination of metrics is highly unusual compared to the broader Steam ecosystem.")
+            else:
+                st.success("🤖 **AI Detection:** This game's multidimensional profile falls within normal statistical boundaries (not flagged as an anomaly by Isolation Forest).")
+    except Exception as e:
+        pass # Fallback to percentiles if AI model fails to load
+
+    # 2. Metric Percentile Extremes
     if not pct_profile.empty:
         anomalies = []
         for _, row in pct_profile.iterrows():
-            if row["market_pct"] >= 90:
-                anomalies.append(f"⬆️ **Exceptionally High {row['display']}**: {row['market_pct']:.0f}th percentile")
-            elif row["market_pct"] <= 10:
-                anomalies.append(f"⬇️ **Exceptionally Low {row['display']}**: {row['market_pct']:.0f}th percentile")
+            if row["market_pct"] >= 95:
+                anomalies.append(f"⬆️ **Exceptionally High {row['display']}**: Top {100 - row['market_pct']:.1f}% of market")
+            elif row["market_pct"] <= 5:
+                anomalies.append(f"⬇️ **Exceptionally Low {row['display']}**: Bottom {row['market_pct']:.1f}% of market")
         
         if anomalies:
             for a in anomalies:
                 st.markdown(f"- {a}")
         else:
-            st.info("No significant statistical anomalies detected across major metrics.")
+            st.info("No single metric is exceptionally high (>95th pct) or low (<5th pct).")
 
     # ── Similar Games ─────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">Similar Games</div>', unsafe_allow_html=True)

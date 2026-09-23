@@ -121,10 +121,7 @@ def _load_raw() -> pd.DataFrame:
             df["metacritic_score"] = df["metacritic_score"].fillna(global_median)
 
     # ── Issue B: Cap price and peak_ccu at 99th percentile ───────────────────
-    for cap_col in ["price", "peak_ccu"]:
-        if cap_col in df.columns:
-            p99 = df[cap_col].quantile(0.99)
-            df[cap_col] = df[cap_col].clip(upper=p99)
+    # Removed: We want the UI to display the true values for top games instead of artificially capping them. Tree-based ML models can handle the raw values.
 
     # ── Issue C: Top-5 tag one-hot encoding ──────────────────────────────────
     if "tags" in df.columns:

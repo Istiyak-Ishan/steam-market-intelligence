@@ -42,6 +42,7 @@ BASE_FEATURES = [
     "average_playtime_forever",   # average playtime (minutes)
     "cat_single_player",          # 1 if categories contains 'Single-player'
 ]
+MODEL_FEATURES = BASE_FEATURES
 
 # ── Price tier definitions (matching notebook bins) ───────────────────────────
 PRICE_TIER_BINS   = [-1, 0, 10, 30, 60, float("inf")]

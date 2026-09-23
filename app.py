@@ -307,6 +307,8 @@ NAV_GROUPS = [
     ("", [
         ("🏠  Overview",               "overview"),
         ("📊  Market Insights",         "market_explorer"),
+        ("📈  Genre Benchmark",         "genre_benchmark"),
+        ("👽  Anomaly Finder",          "anomaly_finder"),
     ]),
     ("ML TOOLS", [
         ("🔮  Predict Tool",           "predict_tool"),
@@ -317,6 +319,8 @@ NAV_GROUPS = [
         ("🎮  Game Analyzer",           "game_analyzer"),
         ("🚀  Publisher Studio",        "publisher_studio"),
         ("♟️  Strategic Playbook",      "strategic_playbook"),
+        ("⚔️  Game Comparison",         "game_comparison"),
+        ("🎯  Similar Games",           "similar_games"),
     ]),
     ("", [
         ("📖  EDA",                    "methodology"),
@@ -431,6 +435,22 @@ try:
 
     elif page_key == "methodology":
         from app.pages.methodology import render
+        render(df)
+
+    elif page_key == "genre_benchmark":
+        from app.pages.genre_benchmark import render
+        render(df)
+
+    elif page_key == "anomaly_finder":
+        from app.pages.anomaly_finder import render
+        render(df)
+
+    elif page_key == "game_comparison":
+        from app.pages.game_comparison import render
+        render(df, models)
+
+    elif page_key == "similar_games":
+        from app.pages.similar_games import render
         render(df)
 
 except Exception as e:
