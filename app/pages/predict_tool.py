@@ -92,33 +92,41 @@ def render(df: pd.DataFrame, models: dict = None, **kwargs) -> None:
                 "🎮 Genre", options=top_genres, index=0,
                 help="Primary genre of the game."
             )
-            dlc_count = st.number_input(
-                "📦 DLC Count", min_value=0, max_value=100, value=0,
-                help="Number of DLC packs planned."
+            total_reviews = st.number_input(
+                "📝 Expected Total Reviews", min_value=0, max_value=5000000, value=500,
+                help="Total expected lifetime user reviews."
+            )
+            peak_ccu = st.number_input(
+                "🔥 Expected Peak CCU", min_value=0, max_value=1000000, value=100,
+                help="Peak concurrent players."
             )
 
         with col2:
-            metacritic_score = st.slider(
-                "⭐ Metacritic Score", min_value=0, max_value=100, value=0,
-                help="Expected metacritic score. 0 = no score."
+            average_playtime = st.number_input(
+                "⏱️ Avg Playtime (Minutes)", min_value=0, max_value=10000, value=120,
+                help="Average lifetime playtime in minutes."
             )
-            review_score_pct = st.slider(
-                "👍 Review Score (%)", min_value=0, max_value=100, value=75,
-                help="Expected positive review percentage."
-            )
-            platform_count = st.selectbox(
-                "💻 Platform Count", options=[1, 2, 3], index=0,
-                help="Number of platforms: Windows only=1, +Mac=2, +Linux=3."
-            )
-
-        with col3:
             game_age_years = st.number_input(
                 "📅 Game Age (years)", min_value=0.0, max_value=30.0, value=0.5, step=0.5,
                 help="How old the game is (0.5 = just launched)."
             )
+            steam_features_count = st.number_input(
+                "⚙️ Steam Features Count", min_value=1, max_value=20, value=4,
+                help="Number of Steam categories (e.g. Single-player, Achievements, Cloud)."
+            )
+            genre_count = st.number_input(
+                "🏷️ Genre Count", min_value=1, max_value=10, value=1,
+                help="Number of genres assigned."
+            )
+
+        with col3:
             languages_count = st.number_input(
-                "🌍 Languages Supported", min_value=1, max_value=40, value=5,
+                "🌍 Text Languages", min_value=1, max_value=40, value=5,
                 help="Number of supported text languages."
+            )
+            audio_languages_count = st.number_input(
+                "🗣️ Full Audio Languages", min_value=0, max_value=40, value=1,
+                help="Number of supported full audio languages."
             )
             is_indie = st.checkbox("🛠️ Indie Game", value=True)
             is_single_player = st.checkbox("🎯 Singleplayer", value=True)
@@ -127,33 +135,37 @@ def render(df: pd.DataFrame, models: dict = None, **kwargs) -> None:
 
     # ── Predictions ────────────────────────────────────────────────────────────
     if submitted:
-        # Build game profile dict
+        # Build game profile dict using the ACTUAL features the model needs
         is_casual = 1 if "Casual" in genre else 0
         is_indie_flag = 1 if is_indie else 0
         cat_sp = 1 if is_single_player else 0
-        log_reviews = float(np.log1p(max(0, review_score_pct * 10)))  # proxy for review count
+        log_reviews = float(np.log1p(total_reviews))
 
         game_profile = {
             "age_by_years":               float(game_age_years),
-            "categories_count":           int(platform_count) + 2,
+            "categories_count":           int(steam_features_count),
             "languages_count":            int(languages_count),
-            "peak_ccu":                   0.0,
+            "peak_ccu":                   float(peak_ccu),
             "log_reviews":                log_reviews,
             "genre_casual":               is_casual,
-            "genre_count":                1,
-            "full_audio_languages_count": min(int(languages_count) // 3, 5),
+            "genre_count":                int(genre_count),
+            "full_audio_languages_count": int(audio_languages_count),
             "is_indie":                   is_indie_flag,
-            "average_playtime_forever":   120.0,  # 2h default for new game
+            "average_playtime_forever":   float(average_playtime),
             "cat_single_player":          cat_sp,
         }
 
-        with st.spinner("Running 3 models simultaneously…"):
-            pred_value  = predict_value_score(game_profile)
+        with st.spinner("Running models simultaneously…"):
+            # Predict core metrics
+            pred_review = predict_review_score(game_profile, price)
             pred_tier, proba_tier = predict_price_tier(game_profile)
             fair_label, fair_conf = predict_fair_price(game_profile, price)
             pred_sweet  = predict_price_sweetspot(game_profile)
-            pred_review = predict_review_score(game_profile, price)
             pred_owners = predict_ownership(game_profile, price)
+            
+            # Dynamically compute value score so it logically reacts to price changes
+            safe_price = max(price, 0.01)
+            pred_value = max(0.0, pred_review) / safe_price
 
         st.markdown("---")
         st.markdown('<div class="section-header">Prediction Results</div>', unsafe_allow_html=True)
@@ -242,10 +254,10 @@ def render(df: pd.DataFrame, models: dict = None, **kwargs) -> None:
         # ── Explanation Expander ───────────────────────────────────────────────
         with st.expander("📖 How was this calculated?"):
             st.markdown(f"""
-**Model 1 — Value Score** (`HistGradientBoostingRegressor`, Test R²=0.16)
-- Target: `quality_score / price` — measures quality points per dollar spent
-- Key features: `log_reviews`, `age_by_years`, `peak_ccu`, `languages_count`
-- Value = `{pred_value:.2f}` means the model predicts this game delivers **{pred_value:.1f} quality points per $1**
+**Model 1 — Value Score** (Dynamic Calculation)
+- Calculated dynamically as: `Predicted Review Score / Price`
+- Value = `{pred_value:.2f}` means the game delivers **{pred_value:.1f} quality points per $1**
+- Adjusting the price will immediately impact this score, making it highly logical for A/B testing price points.
 
 **Model 2 — Price Tier** (`HistGradientBoostingClassifier`, Test Accuracy=80.5%)
 - Target: Categorizes a game into Budget / Mid-range / Premium / AAA
