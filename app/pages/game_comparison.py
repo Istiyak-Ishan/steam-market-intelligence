@@ -65,25 +65,32 @@ def render(df, models=None):
     
     showdown_name = st.selectbox("Select Preset Showdown (or create your own)", list(PRESET_SHOWDOWNS.keys()) + ["<Custom>"])
     
-    if showdown_name == "<Custom>":
-        default_titles = []
-    else:
-        default_titles = [t for t in PRESET_SHOWDOWNS[showdown_name] if t in df["name"].values]
-        
+    if "current_showdown" not in st.session_state or st.session_state.current_showdown != showdown_name:
+        st.session_state.current_showdown = showdown_name
+        if showdown_name == "<Custom>":
+            st.session_state.compare_titles = []
+        else:
+            st.session_state.compare_titles = [t for t in PRESET_SHOWDOWNS[showdown_name] if t in df["name"].values]
+            
     search_q = st.text_input("Search for specific games to add to the dropdown below:", "")
     
     popular_games = df.sort_values("total_review", ascending=False)["name"].dropna().head(2000).tolist()
-    options_set = set(popular_games + default_titles)
+    options_set = set(popular_games + st.session_state.compare_titles)
     
     if search_q and len(search_q) >= 2:
-        matches = df[df["name"].str.contains(search_q, case=False, na=False)]["name"].tolist()
+        matches = df[df["name"].str.contains(search_q, case=False, na=False)]["name"].unique().tolist()
         options_set.update(matches[:100])
+        
+    def update_titles():
+        st.session_state.compare_titles = st.session_state._compare_titles_widget
         
     titles = st.multiselect(
         "Select Games to Compare (max 5)", 
         options=sorted(list(options_set)), 
-        default=default_titles,
-        max_selections=5
+        default=st.session_state.compare_titles,
+        max_selections=5,
+        key="_compare_titles_widget",
+        on_change=update_titles
     )
     
     # Filter dataset for these games

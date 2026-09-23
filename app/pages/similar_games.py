@@ -90,7 +90,12 @@ def render(df):
         if matches.empty:
             st.warning("No matches found.")
             return
-        target_name = st.selectbox("Select exact match", matches["name"].tolist())
+            
+        if len(matches) > 100:
+            st.info(f"Found {len(matches)} matches. Showing first 100.")
+            matches = matches.head(100)
+            
+        target_name = st.selectbox("Select exact match", matches["name"].unique().tolist())
         
     target_row = df[df["name"] == target_name]
     if target_row.empty:
