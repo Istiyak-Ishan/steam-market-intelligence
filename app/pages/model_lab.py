@@ -222,25 +222,35 @@ def render(df=None, models=None, **kwargs) -> None:
                     with st.spinner("Evaluating classifier on test set…"):
                         clf = joblib.load(clf_path)
 
+                        # Must match the exact encoding used during training
+                        tier_map = {"Budget": 0, "Mid-range": 1, "Premium": 2, "AAA": 3}
+                        tier_names = ["Budget", "Mid-range", "Premium", "AAA"]
+
                         features = BASE_FEATURES
                         sub = df[
                             df["price_tier"].notna() &
                             df["review_score_pct"].notna() &
-                            (df["price_tier"] != "Free")
+                            df["price_tier"].isin(tier_map.keys())
                         ].copy()
                         sub = sub[[f for f in features if f in sub.columns] + ["price_tier"]].dropna()
 
                         X = sub[[f for f in features if f in sub.columns]].fillna(0)
-                        y = sub["price_tier"]
+                        # Encode string labels → integers (matching training)
+                        y = sub["price_tier"].map(tier_map)
 
                         _, X_test, _, y_test = train_test_split(
                             X, y, test_size=0.2, random_state=42, stratify=y
                         )
 
                         y_pred = clf.predict(X_test)
-                        labels = sorted(y_test.unique())
 
-                        cm = confusion_matrix(y_test, y_pred, labels=labels)
+                        # Decode integers back → readable names for display
+                        reverse_map = {v: k for k, v in tier_map.items()}
+                        y_test_named = [reverse_map.get(v, str(v)) for v in y_test]
+                        y_pred_named = [reverse_map.get(v, str(v)) for v in y_pred]
+                        labels = tier_names
+
+                        cm = confusion_matrix(y_test_named, y_pred_named, labels=labels)
                         cm_df = pd.DataFrame(cm, index=labels, columns=labels)
 
                         fig_cm = go.Figure(data=go.Heatmap(
@@ -263,11 +273,11 @@ def render(df=None, models=None, **kwargs) -> None:
 
                         st.markdown("---")
                         st.markdown('<div class="section-header">Classification Report</div>', unsafe_allow_html=True)
-                        cr = classification_report(y_test, y_pred, labels=labels)
+                        cr = classification_report(y_test_named, y_pred_named, labels=labels)
                         st.code(cr, language="text")
 
                         # Accuracy metric
-                        acc = (y_pred == y_test.values).mean()
+                        acc = sum(p == t for p, t in zip(y_pred_named, y_test_named)) / len(y_test_named)
                         st.metric("Overall Test Accuracy", f"{acc*100:.1f}%")
                 else:
                     st.warning("Price tier classifier model file not found.")
